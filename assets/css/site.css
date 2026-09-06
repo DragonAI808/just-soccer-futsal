@@ -8,7 +8,7 @@
    ========================================================================== */
 
 :root{
-  /* brand — modal colors sampled from logo.png */
+  /* brand — modal colors sampled from logo-source.png */
   --royal:      #0039A5;  --royal-rgb:      0, 57,165;   /* the badge blue */
   --royal-dp:   #012A78;  --royal-dp-rgb:   1, 42,120;
   --royal-lt:   #2B62D4;  --royal-lt-rgb:  43, 98,212;
@@ -189,9 +189,11 @@ ul{ list-style:none; padding:0; }
   background:var(--royal-dp);
   transition:opacity .7s var(--ease), visibility .7s;
 }
-.load__mark{ width:clamp(5rem,18vw,7.5rem); }
+/* The badge is the whole loading screen — it is the only thing on it, so it
+   gets to be big. Capped at 30rem so it does not overflow a short laptop. */
+.load__mark{ width:clamp(13rem,42vw,30rem); max-height:62svh; object-fit:contain; }
 .load__bar{
-  margin:1.1rem auto 0; height:3px; width:min(46vw,220px);
+  margin:2rem auto 0; height:3px; width:min(46vw,220px);
   background:rgba(var(--paper-rgb),.2); overflow:hidden;
 }
 .load__bar i{
@@ -226,16 +228,16 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
 /* the nav is fixed, so an in-page jump would otherwise land the heading under it */
 #game, #programs, #arena, #tonight, #visit{ scroll-margin-top:4.5rem; }
 
-.brand{ display:flex; align-items:center; gap:.75rem; color:var(--paper); }
-.brand__chip{
-  width:2.9rem; height:2.9rem; flex:none;
-  display:grid; place-items:center;
-  background:var(--paper); border-radius:50%;
-  padding:.18rem;
+.brand{ display:flex; align-items:center; gap:.7rem; color:var(--paper); }
+/* No white chip any more. It only ever existed because the old badge was a
+   full-colour mark on an opaque white ground — keying that white out would have
+   taken the ball's own white panels with it. The replacement has a real alpha
+   channel, so the badge sits straight on the blue. */
+.brand__mark{
+  width:3.1rem; height:auto; flex:none;
   transition:transform .3s var(--ease);
 }
-.brand:hover .brand__chip{ transform:rotate(-6deg) scale(1.04); }
-.brand__chip img{ width:100%; height:100%; object-fit:contain; }
+.brand:hover .brand__mark{ transform:rotate(-6deg) scale(1.05); }
 .brand__txt{
   font-family:var(--display); text-transform:uppercase;
   font-size:.95rem; line-height:.98; letter-spacing:.04em;

@@ -22,8 +22,9 @@ index.html                  all the markup and copy
 DESIGN.md                   the design spec — read this before restyling anything
 assets/css/site.css         design tokens + every style
 assets/js/site.js           preloader, reveal, nav, statement, camera, zoom, parallax
-assets/img/logo.{png,webp}  the club badge
-assets/img/favicon-180.png  tab icon (the ball, cropped from the badge)
+assets/img/logo-source.png  the club badge, 1298x1212 with alpha (master)
+assets/img/logo-{720,260}.webp  derived sizes actually used by the page
+assets/img/favicon-180.png  tab icon (the ball, cropped from the master)
 assets/img/og-1200x630.jpg  social share card
 assets/video/               empty; drop clips here when there are any
 serve.js                    local preview server
@@ -65,9 +66,9 @@ frame is pinned, over about 1.5 screens of scroll.
 Tuned entirely from HTML attributes:
 
 ```html
-<div class="hero__plane hero__frame" data-cam data-cam-arc data-cam-arc data-cam-y="-4"  data-cam-scale="0.52">
-<div class="hero__plane hero__court" data-cam data-cam-arc data-cam-arc data-cam-y="-15" data-cam-scale="0.92" data-cam-fade="0.6">
-<div class="hero__plane hero__net"   data-cam data-cam-arc data-cam-arc data-cam-y="-38" data-cam-scale="1.75" data-cam-fade="0.9">
+<div class="hero__plane hero__frame" data-cam data-cam-arc data-cam-y="-4"  data-cam-scale="0.52">
+<div class="hero__plane hero__court" data-cam data-cam-arc data-cam-y="-15" data-cam-scale="0.92" data-cam-fade="0.6">
+<div class="hero__plane hero__net"   data-cam data-cam-arc data-cam-y="-38" data-cam-scale="1.75" data-cam-fade="0.9">
 <div class="hero__inner"             data-cam             data-cam-y="-7"  data-cam-scale="0"    data-cam-fade="1.25">
 ```
 
@@ -123,8 +124,8 @@ Three things that are load-bearing and not obvious:
 
 Every image on the page is pulled from your own site's CDN, so there is no
 licensing question left: the hero and social card come from `Futsal 4.jpg`, the
-arena band and the story crop from `Futsal wide angle pics-126.jpg`, and the badge
-from `Logo.jpg`. The Czech stock placeholders are gone.
+arena band and the story crop from `Futsal wide angle pics-126.jpg`. The badge came separately
+and is covered in section 2. The Czech stock placeholders are gone.
 
 Two ceilings worth knowing:
 
@@ -132,7 +133,7 @@ Two ceilings worth knowing:
 |---|---|---|
 | `Futsal 4.jpg` (hero) | 2500px | Plenty. No issue. |
 | `Futsal wide angle pics-126.jpg` | **1291px** | Mild upscale in the arena band; the scrim hides it. Don't promote it to a full-height hero. |
-| `Logo.jpg` (badge) | **347×335** | Fine for the nav chip, footer and story block. Get the vector before printing it or using it at hero scale. |
+| `logo-source.png` (badge) | **1298×1212, alpha** | No longer a constraint. Only a vector would beat it, and only for print. |
 
 **If you have the originals** — on a phone, a camera card, a hard drive — they are
 a drop-in replacement. Same filenames, same crops, no code changes. That is the
@@ -144,44 +145,33 @@ none of them are in the build. If you want any of them in, save them into
 yours to use; ones uploaded by customers belong to those customers, so pick from
 your own.
 
-### 2. NEXT SESSION — swap in `logo1.png` (transparent, 1298×1212)
+### 2. The badge — done, and how to regenerate it
 
-**This is the first thing to pick up.** `assets/img/logo1.png` is already in the
-repo but **nothing references it yet**. It is a strictly better source than the
-`logo.png` the site currently uses:
+`assets/img/logo-source.png` is the master: **1298×1212 with a real alpha
+channel**. The page never loads it directly; it uses two derived sizes:
 
-| | in use: `logo.png` | waiting: `logo1.png` |
+| File | Size | Used by |
 |---|---|---|
-| Size | 347×335 | **1298×1212** |
-| Background | opaque white | **alpha channel** |
+| `logo-720.webp` | 208 KB | preloader, story section |
+| `logo-260.webp` | 48 KB | nav mark, footer |
+| `favicon-180.png` | 64 KB | tab icon — the ball, cropped from the master |
 
-It removes both compromises currently baked into the build:
+To regenerate after replacing the master:
 
-1. **The nav badge can lose its white chip.** `.brand__chip` exists only because
-   the current badge is a full-colour mark on white — keying that white out would
-   have taken the ball's own white panels with it and left a hollow outline. With
-   real transparency the badge sits directly on the royal blue.
-2. **The badge can be used large.** 347px capped it to the nav, footer and story
-   block. 1298px covers display sizes.
-
-To do it:
-
-```bash
-# derived sizes from the transparent source (keep alpha — use PNG or lossless WebP)
-ffmpeg -i assets/img/logo1.png -vf "scale=560:-1:flags=lanczos" -c:v libwebp -lossless 1 assets/img/logo-560.webp
-ffmpeg -i assets/img/logo1.png -vf "scale=200:-1:flags=lanczos" -c:v libwebp -lossless 1 assets/img/logo-200.webp
-# favicon, re-cut from the transparent original rather than the small one
-ffmpeg -i assets/img/logo1.png -vf "crop=560:560:370:330,scale=180:180:flags=lanczos" -y assets/img/favicon-180.png
+```powershell
+ffmpeg -i assets/img/logo-source.png -vf "scale=720:-1:flags=lanczos" -c:v libwebp -quality 82 -y assets/img/logo-720.webp
+ffmpeg -i assets/img/logo-source.png -vf "scale=260:-1:flags=lanczos" -c:v libwebp -quality 86 -y assets/img/logo-260.webp
+ffmpeg -i assets/img/logo-source.png -vf "crop=490:490:352:344,scale=180:180:flags=lanczos" -y assets/img/favicon-180.png
 ```
 
-Then: point the four `<img>` references (nav, preloader, story `.split__badge`,
-footer `.foot__logo`) at the new files, delete `.brand__chip`'s white background
-and padding in `site.css`, and update the resolution table in §1 above plus the
-"Known state" note at the bottom of `DESIGN.md` — both currently say 347×335 is
-the ceiling, which stops being true the moment this lands.
+**Encode lossy, not lossless.** The halftone dots and spray spatter behave like
+photographic noise: lossless WebP produced 816 KB at 900px, lossy at q82 gives
+208 KB at 720px with nothing visibly lost. `libwebp` preserves the alpha channel
+either way — check with `ffprobe`, the pixel format should read `yuva420p`.
 
-`git mv assets/img/logo1.png assets/img/logo.png` at the end, so the filename
-matches what it is. Then re-run `py -3 test/interactions.py`.
+The nav badge has no white chip behind it any more. That only ever existed
+because the earlier badge was a full-colour mark on opaque white, and keying that
+white out would have taken the ball's own white panels with it.
 
 ### 3. Details that disagree between sources — check before publishing
 

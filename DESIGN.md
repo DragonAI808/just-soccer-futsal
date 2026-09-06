@@ -4,7 +4,7 @@ Reverse-engineered from the shipped build, not invented for it. Every token belo
 is live in `assets/css/site.css`; this file is the readable version of it.
 
 **The identity is not ours to choose.** Both brand colors are read off the pixels
-of the club badge (`assets/img/logo.png`), not picked. Royal `#0039A5` and orange
+of the club badge (`assets/img/logo-source.png`), not picked. Royal `#0039A5` and orange
 `#EF6C00` are the modal saturated colors in that file — 10,173 and 8,125 pixels
 respectively. The badge is spray-paint and halftone dots, so the page carries that
 texture too. A "bolder" or more "distinctive" palette would make this a worse site,
@@ -61,7 +61,7 @@ seventeen magic numbers that no longer tracked the palette.
 
 ```css
 :root{
-  /* brand — modal colors sampled from logo.png */
+  /* brand — modal colors sampled from logo-source.png */
   --royal:      #0039A5;  --royal-rgb:      0, 57,165;   /* the badge blue */
   --royal-dp:   #012A78;  --royal-dp-rgb:   1, 42,120;
   --royal-lt:   #2B62D4;  --royal-lt-rgb:  43, 98,212;
@@ -180,11 +180,29 @@ is already the loudest thing on the page.
 touch — without a pressed state a tap gave no feedback at all on the devices this
 audience actually uses.
 
-### The badge in the nav
+### The badge
 
-The logo is a full-color mark on a white ground. It rides in a **white circular
-chip** (`.brand__chip`) rather than being keyed out: knocking the white background
-out would take the ball's own white panels with it and leave a hollow outline.
+`assets/img/logo-source.png` is 1298×1212 **with a real alpha channel**, so the
+badge sits directly on any ground — no chip, no plate, no knockout. Its lettering
+is blue with a white outline, which is why it holds on both the royal grounds and
+the white ones.
+
+Two derived sizes, both lossy WebP with alpha:
+
+| File | Used by |
+|---|---|
+| `logo-720.webp` (208 KB) | preloader, story section |
+| `logo-260.webp` (48 KB) | nav mark, footer |
+
+**Encode lossy, not lossless.** The halftone dots and spray spatter are
+effectively photographic noise: lossless WebP took the 900px version to 816 KB,
+lossy at q82 gives 208 KB with no visible loss. `libwebp` keeps the alpha channel
+either way.
+
+An earlier build wrapped the badge in a white circular chip, because the only
+copy available then was a full-colour mark on an opaque white ground — keying
+that white out would have taken the ball's own white panels with it and left a
+hollow outline. The chip is gone.
 
 ### Scoreboard (`.board__panel`)
 
@@ -346,7 +364,7 @@ JS so no transform is ever written.
 
 ### Do
 
-1. Take color from the badge. Both brand colors are sampled from `logo.png`.
+1. Take color from the badge. Both brand colors are sampled from `logo-source.png`.
 2. Compose translucency from `--*-rgb` tokens, never fresh channel numbers.
 3. Keep square corners. Court lines are straight.
 4. Put dark ink on orange; use `--orange-ink` for orange text on white.
@@ -406,9 +424,8 @@ Two resolution ceilings to know about:
 - The wide-angle of the hall is **1291px** native — the largest their CDN holds.
   It covers a 1440px band with a mild upscale, and the arena scrim is heavy enough
   to hide it. Do not push that image into a full-height hero.
-- The badge is **347x335** native, likewise the maximum available. Fine for the nav
-  chip, footer and story block; get the vector from whoever drew it before using
-  it at hero scale or in print.
+- The badge is **1298x1212 with alpha** and is no longer a constraint. Only a
+  vector would beat it, and only for print.
 
 If higher-resolution originals exist on a phone or a hard drive somewhere, they
 are a drop-in replacement — same filenames, same crops, no code change.
