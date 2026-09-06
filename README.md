@@ -144,10 +144,44 @@ none of them are in the build. If you want any of them in, save them into
 yours to use; ones uploaded by customers belong to those customers, so pick from
 your own.
 
-### 2. The badge is real, at the size their CDN holds
+### 2. NEXT SESSION — swap in `logo1.png` (transparent, 1298×1212)
 
-The club badge now appears in the nav (white chip), the preloader, the story
-section and the footer. See the resolution note above.
+**This is the first thing to pick up.** `assets/img/logo1.png` is already in the
+repo but **nothing references it yet**. It is a strictly better source than the
+`logo.png` the site currently uses:
+
+| | in use: `logo.png` | waiting: `logo1.png` |
+|---|---|---|
+| Size | 347×335 | **1298×1212** |
+| Background | opaque white | **alpha channel** |
+
+It removes both compromises currently baked into the build:
+
+1. **The nav badge can lose its white chip.** `.brand__chip` exists only because
+   the current badge is a full-colour mark on white — keying that white out would
+   have taken the ball's own white panels with it and left a hollow outline. With
+   real transparency the badge sits directly on the royal blue.
+2. **The badge can be used large.** 347px capped it to the nav, footer and story
+   block. 1298px covers display sizes.
+
+To do it:
+
+```bash
+# derived sizes from the transparent source (keep alpha — use PNG or lossless WebP)
+ffmpeg -i assets/img/logo1.png -vf "scale=560:-1:flags=lanczos" -c:v libwebp -lossless 1 assets/img/logo-560.webp
+ffmpeg -i assets/img/logo1.png -vf "scale=200:-1:flags=lanczos" -c:v libwebp -lossless 1 assets/img/logo-200.webp
+# favicon, re-cut from the transparent original rather than the small one
+ffmpeg -i assets/img/logo1.png -vf "crop=560:560:370:330,scale=180:180:flags=lanczos" -y assets/img/favicon-180.png
+```
+
+Then: point the four `<img>` references (nav, preloader, story `.split__badge`,
+footer `.foot__logo`) at the new files, delete `.brand__chip`'s white background
+and padding in `site.css`, and update the resolution table in §1 above plus the
+"Known state" note at the bottom of `DESIGN.md` — both currently say 347×335 is
+the ceiling, which stops being true the moment this lands.
+
+`git mv assets/img/logo1.png assets/img/logo.png` at the end, so the filename
+matches what it is. Then re-run `py -3 test/interactions.py`.
 
 ### 3. Details that disagree between sources — check before publishing
 
