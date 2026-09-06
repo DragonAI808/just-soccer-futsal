@@ -1,0 +1,13 @@
+# Original masters live locally only — the site references the optimized copies
+# in assets/. Leading slash anchors these to the repo root so assets/video/*.mp4
+# and assets/img/* stay tracked.
+/*.mp4
+/*.mov
+/*.jpg
+/*.jpeg
+/*.png
+
+# local tooling
+/.claude/
+node_modules/
+_chrome/
