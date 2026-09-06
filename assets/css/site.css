@@ -666,9 +666,12 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
 /* ==========================================================================
    SPLIT — photograph + copy, image drifting on a parallax
    ========================================================================== */
+/* The photograph here is landscape (1291x998), not the portrait crop this
+   section used to carry, so the image column takes the larger share — an even
+   split left a short, stranded picture beside a tall stack of text. */
 .split{
-  display:grid; gap:clamp(2rem,5vw,4.5rem);
-  grid-template-columns:1fr 1fr; align-items:center;
+  display:grid; gap:clamp(2rem,5vw,4rem);
+  grid-template-columns:1.22fr 1fr; align-items:center;
   padding:clamp(4rem,11vh,8rem) var(--pad);
   max-width:var(--maxw); margin-inline:auto;
 }
@@ -688,7 +691,7 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
 }
 /* the badge, printed large, on the one section that is about the club itself */
 .split__badge{
-  width:clamp(7rem,14vw,11rem); margin-bottom:1.8rem;
+  width:clamp(10rem,22vw,17rem); margin-bottom:2rem;
 }
 @media (max-width:880px){ .split{ grid-template-columns:1fr; } }
 
