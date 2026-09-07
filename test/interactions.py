@@ -162,9 +162,15 @@ with sync_playwright() as p:
     # the SET rather than "one of them is right" is the point — a missed one
     # sends somebody to a dead URL and nothing else here would notice.
     BOOKING = "https://app.squarespacescheduling.com/schedule/9e3bd3ec"
-    book = pg.evaluate("""() => [...document.querySelectorAll('a')]
-        .filter(a => a.textContent.trim().toLowerCase() === 'book a session')
-        .map(a => a.getAttribute('href'))""")
+    # Read the VISIBLE label only: every off-site link now carries a hidden
+    # "(opens in a new tab)" note, which is part of textContent.
+    VISIBLE = """a => { const c = a.cloneNode(true);
+        c.querySelectorAll('.vh').forEach(v => v.remove());
+        return c.textContent.replace(/\s+/g, ' ').trim().toLowerCase(); }"""
+    book = pg.evaluate("""() => { const label = %s;
+        return [...document.querySelectorAll('a')]
+            .filter(a => label(a) === 'book a session')
+            .map(a => a.getAttribute('href')); }""" % VISIBLE)
     check_true(f"home has every Book a session link ({len(book)} found)", len(book) >= 5)
     check("and all of them point at Squarespace Scheduling", sorted(set(book)), [BOOKING])
     check("no link still points at the retired /session page",
@@ -478,9 +484,10 @@ with sync_playwright() as p:
 
     # Both pages have to reach each other, or the nav is decorative.
     check_true("About links home", ab.locator('a[href="index.html"]').count() > 0)
-    abook = ab.evaluate("""() => [...document.querySelectorAll('a')]
-        .filter(a => a.textContent.trim().toLowerCase() === 'book a session')
-        .map(a => a.getAttribute('href'))""")
+    abook = ab.evaluate("""() => { const label = %s;
+        return [...document.querySelectorAll('a')]
+            .filter(a => label(a) === 'book a session')
+            .map(a => a.getAttribute('href')); }""" % VISIBLE)
     check("About's booking links go to Squarespace too", sorted(set(abook)),
           ["https://app.squarespacescheduling.com/schedule/9e3bd3ec"])
 
@@ -504,6 +511,48 @@ with sync_playwright() as p:
     for part in chrome_home:
         check(f"shared chrome matches across pages: {part}",
               chrome_about[part], chrome_home[part])
+
+    print("\n[14] EVERY OFF-SITE LINK OPENS IN ITS OWN TAB")
+
+    # Booking, Maps and the social profiles all hand the visitor to someone
+    # else's site. None of them may take the tab with them.
+    LINKS = """() => [...document.querySelectorAll('a[href^="http"]')]
+        .filter(a => a.hostname !== location.hostname)
+        .map(a => ({
+            host: a.hostname,
+            target: a.getAttribute('target'),
+            rel: a.getAttribute('rel') || '',
+            // what a screen reader would announce
+            name: (a.getAttribute('aria-label')
+                   || a.textContent.replace(/\\s+/g, ' ').trim()).toLowerCase()
+        }))"""
+    for page, label in ((pg, "home"), (ab, "About")):
+        ext = page.evaluate(LINKS)
+        check_true(f"{label} has off-site links to check ({len(ext)})", len(ext) >= 6)
+        check(f"{label}: all of them open in a new tab",
+              [e["host"] for e in ext if e["target"] != "_blank"], [])
+        check(f"{label}: all of them carry rel=noopener",
+              [e["host"] for e in ext if "noopener" not in e["rel"]], [])
+        # WCAG 3.2.5 — a link that moves you somewhere unexpected has to say so,
+        # in the accessible name. Icon links extend their existing aria-label;
+        # text links append a .vh note, which keeps the visible words at the
+        # START of the name so voice control still matches them (WCAG 2.5.3).
+        check(f"{label}: all of them announce the new tab",
+              [e["host"] for e in ext if "new tab" not in e["name"]], [])
+
+    # ...and the ones that are NOT navigations must be left alone. target on a
+    # mailto: opens a blank tab alongside the mail client in some browsers.
+    for page, label in ((pg, "home"), (ab, "About")):
+        stay = page.evaluate("""() => [...document.querySelectorAll(
+            'a[href^="tel:"], a[href^="mailto:"], a[href^="#"]')]
+            .filter(a => a.getAttribute('target'))
+            .map(a => a.getAttribute('href'))""")
+        check(f"{label}: phone, email and in-page links do NOT get a new tab", stay, [])
+
+    # The hidden note must not change any button's box.
+    btns = pg.evaluate("""() => [...document.querySelectorAll('.btn')]
+        .map(b => Math.round(b.getBoundingClientRect().height))""")
+    check("the hidden note leaves button heights alone", sorted(set(btns)), [42, 56])
     hm = b.new_page(viewport={"width": 1440, "height": 900})
     hm.goto(URL)
     hm.wait_for_load_state("networkidle")

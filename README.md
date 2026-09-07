@@ -377,9 +377,17 @@ If the scheduling link ever changes, change all seven. `test/interactions.py`
 asserts the whole SET matches, not that one of them is right, so a missed link
 fails loudly rather than quietly sending somebody to a dead URL.
 
-They open in the same tab, matching every other external link on the site
-(Instagram, Facebook, Maps). The waiver PDF is the single exception, and only
-because a PDF viewer taking over the tab is a different kind of dead end.
+Every off-site link opens in a new tab - booking, Google Maps, and the three
+social profiles: 12 on `index.html`, 6 on `about.html`, plus the waiver PDF.
+`tel:`, `mailto:` and in-page anchors deliberately do NOT, since `target` on a
+`mailto:` leaves a blank tab behind in some browsers.
+
+Each one says so in its accessible name (WCAG 3.2.5). Icon links extend the
+`aria-label` they already carry; text links get `<span class="vh"> (opens in a
+new tab)</span>` appended, which keeps the visible words at the START of the
+accessible name so voice control still matches what a user can read (WCAG
+2.5.3). The `.vh` span is `position:absolute`, so it is not a flex item and adds
+no gap inside a `.btn`.
 
 ### 7. The waiver PDF is a blank template — keep it that way
 
