@@ -28,6 +28,8 @@ assets/img/logo-source.png  the club badge, 1298x1212 with alpha (master)
 assets/img/logo-{720,260}.webp  derived sizes actually used by the page
 assets/img/favicon-180.png  tab icon (the ball, cropped from the master)
 assets/img/og-1200x630.jpg  social share card
+assets/img/coach-source.png the Coach Ernie illustration, 1122x1402 (master)
+assets/img/coach-900.{webp,jpg}  derived size used by about.html
 assets/docs/clinic-waiver.pdf   the club's liability waiver, linked from the footer
 assets/video/               empty; drop clips here when there are any
 serve.js                    local preview server
@@ -66,7 +68,7 @@ suite enforces parts of it.
 |---|---|
 | Page head | Their own sign-off, "Live your passion! Play the game!", as the h1. Solid nav — see below. |
 | Mission | **Their words, verbatim.** See the warning under it. |
-| Founder | Coach Ernie, beside `story-1`. |
+| Founder | Coach Ernie. Copy left at the page margin, the brand illustration right. |
 | Facility | The arena band reused from the home page, left-aligned because it holds body copy here rather than four stats. |
 
 The copy came from `justsoccerfutsal.org/about`. The home page already carries a
@@ -88,6 +90,22 @@ One thing worth deciding: the About copy says **"Just Soccer FC"** throughout,
 the site says **"Just Soccer Futsal Center"**, and the waiver says **"Just Soccer
 FC LLC"**. Three names for one business. Left as-is because it is quoted text,
 but it is the sort of thing a visitor notices.
+
+**The coach illustration must not be cropped.** `coach-source.png` is 1122x1402,
+exactly 4:5, and `.about-split__figure` is set to 4:5 to match so `object-fit`
+takes nothing off. The ball sits in the bottom-left corner and the tactics board
+in the top-right, and those are the two things that make it read as a coach
+rather than a portrait. It is capped by WIDTH, never by height, for that reason.
+It is also the only illustration on the site - everything else is photography.
+
+**The footer seam.** The facility band ends on `rgb(1,42,120)` and the footer
+begins on `rgb(1,42,120)`. Identical, so with nothing between them the two read
+as one endless blue field. The home page never hits this because its footer
+follows the chalk Visit section. It is solved by ending the facility scrim on
+`--royal` instead of `--royal-dp`, so the boundary is a genuine step in value
+rather than a rule drawn across it - a line was tried first and looked like a
+line. If you restyle either background, keep them different or put something
+back. The suite asserts the two grounds differ.
 
 `#nav.is-solid` exists for this page: the home bar is transparent until you
 scroll past 72% of the hero, which works because it sits on a photograph for

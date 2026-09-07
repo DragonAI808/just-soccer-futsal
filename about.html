@@ -47,7 +47,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="assets/css/site.css?v=20">
+<link rel="stylesheet" href="assets/css/site.css?v=21">
 </head>
 
 <body>
@@ -132,15 +132,11 @@
 <!-- ==========================================================
      THE FOUNDER
      ========================================================== -->
+<!-- Copy first in the DOM, picture second. That puts the text on the left at the
+     page margin, matching the header and the mission above it, and it is also
+     the better reading order: the heading introduces the section, so a screen
+     reader and a phone both meet it before the illustration. -->
 <section class="about-split" id="founder">
-  <figure class="about-split__figure" data-reveal>
-    <picture>
-      <source type="image/webp" srcset="assets/img/story-1.webp">
-      <img src="assets/img/story-1.jpg" width="654" height="715" loading="lazy" decoding="async"
-           alt="Adults playing five a side under the Sunday Futsal banner at Just Soccer.">
-    </picture>
-  </figure>
-
   <div class="about-split__body">
     <p class="eyebrow" data-reveal>Who built it</p>
     <h2 class="h2" data-reveal style="--d:.08s">Coach Ernie</h2>
@@ -156,6 +152,18 @@
       enthusiasts to have access to the beautiful game.
     </p>
   </div>
+
+  <!-- Brand illustration, not a photograph, and the only one on the site. It is
+       1122x1402 — exactly 4:5 — so the frame is set to 4:5 and nothing is
+       cropped: the ball at the bottom left and the tactics board top right both
+       survive, and they are the parts that make it read as a coach. -->
+  <figure class="about-split__figure" data-reveal style="--d:.12s">
+    <picture>
+      <source type="image/webp" srcset="assets/img/coach-900.webp">
+      <img src="assets/img/coach-900.jpg" width="900" height="1124" loading="lazy" decoding="async"
+           alt="Illustration of Coach Ernie in a Just Soccer Futsal Center shirt, holding a ball, with a whistle and a tactics board behind him.">
+    </picture>
+  </figure>
 </section>
 
 <!-- ==========================================================
@@ -245,6 +253,6 @@
   </div>
 </footer>
 
-<script src="assets/js/site.js?v=20"></script>
+<script src="assets/js/site.js?v=21"></script>
 </body>
 </html>

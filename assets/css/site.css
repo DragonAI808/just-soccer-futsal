@@ -984,12 +984,16 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
      appearing to touch the crest. */
   padding:clamp(5.5rem,14vh,9.5rem) var(--pad) clamp(4rem,11vh,8rem);
 }
-/* Landscape, not the 4:5 portrait it started as. At 4:5 the picture stood 765px
-   against a 376px column of text - twice the height of the thing it is meant to
-   sit beside, which is what made the section feel lopsided rather than paired. */
+/* 4:5, matching the illustration's own 1122x1402 exactly, so object-fit crops
+   nothing. The earlier 4:3 was there to stop a PHOTOGRAPH towering over the copy;
+   the fix here is a width cap instead, because cropping this one would cut the
+   ball off the bottom or the tactics board off the top.
+   Capped and pushed to the right margin so it ends where the page ends, rather
+   than floating in the middle of a half-empty column. */
 .about-split__figure{
-  margin:0; overflow:hidden; aspect-ratio:4 / 3;
-  max-height:clamp(17rem,52vh,30rem);
+  margin:0; overflow:hidden; aspect-ratio:4 / 5;
+  width:100%; max-width:clamp(15rem,29vw,25rem);
+  justify-self:end;
 }
 .about-split__figure img{ width:100%; height:100%; object-fit:cover; object-position:50% 45%; }
 .about-split__body{ max-width:52ch; }
@@ -997,7 +1001,9 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
 .about-split__p{ margin-top:1.1rem; color:var(--ink-soft); }
 @media (max-width:880px){
   .about-split{ grid-template-columns:1fr; gap:2.5rem; }
-  .about-split__figure{ aspect-ratio:4 / 3; }
+  /* stays 4:5 - a landscape override here would crop the illustration, which
+     is the one image on the site that must not be cropped */
+  .about-split__figure{ justify-self:center; max-width:min(22rem, 100%); }
 }
 
 /* The arena band centres its text, which is right for the home page's headline
@@ -1005,16 +1011,25 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
    centred lines rag on both edges with no left margin for the eye to return to
    — measurably slower to read and it looks like a caption. Same band, same
    photograph, left-aligned copy. */
-/* The band ends on rgb(1,42,120) and the footer BEGINS on rgb(1,42,120) — the
-   same value, so there was no seam at all and the two read as one endless blue
-   field. On the home page the footer is preceded by the chalk Visit section, so
-   the problem never arose there.
+/* The seam with the footer.
+   The band ended on rgb(1,42,120) and the footer BEGINS on rgb(1,42,120) - the
+   identical value - so there was no seam at all and the two read as one endless
+   blue field. On the home page the footer is preceded by the chalk Visit
+   section, so the problem never arose there.
 
-   An orange rule, not a touchline: the chalk line's halfway circle was taken off
-   the home footer deliberately, and a white disc on this blue would be louder
-   still. This is the same 3px orange edge the nav carries when it sticks, so the
-   page opens and closes on the same mark. */
-#facility{ text-align:left; border-bottom:3px solid var(--orange); }
+   A drawn rule was the first fix and it looked like a drawn rule. This instead
+   makes the two sections genuinely different tones: the scrim now finishes on
+   royal rather than royal-dp, so the photograph stays open and lit at the
+   bottom and the darker footer reads as a step down from it. The boundary comes
+   from the change in value, the way every other section change on this site
+   does, rather than from a line laid across it. */
+#facility{ text-align:left; }
+#facility .arena__scrim{
+  background:linear-gradient(180deg,
+    rgba(var(--royal-dp-rgb),.88),
+    rgba(var(--royal-dp-rgb),.58) 45%,
+    rgba(var(--royal-rgb),.72));
+}
 /* The inner box is sized for the HEADLINE, the paragraphs are narrowed
    separately. Holding both to one measure forced "Street-style" to break at
    its own hyphen, which reads as a typo rather than a line break. */

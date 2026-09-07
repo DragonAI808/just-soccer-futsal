@@ -504,8 +504,7 @@ with sync_playwright() as p:
     }""")
     check_true(f"picture clears the divider badge ({clearance}px)", clearance >= 40)
 
-    # And it has to sit BESIDE the text, not tower over it. At 4:5 it stood
-    # twice the height of the column it pairs with.
+    # And it has to sit BESIDE the copy, not tower over it.
     ratio = ab.evaluate("""() => {
         const f = document.querySelector('.about-split__figure').getBoundingClientRect().height;
         const t = document.querySelector('.about-split__body').getBoundingClientRect().height;
@@ -513,19 +512,50 @@ with sync_playwright() as p:
     }""")
     check_true(f"picture is not more than 1.5x the text ({ratio:.2f}x)", ratio <= 1.5)
 
-    # The facility band ends on the same colour the footer begins on, so without
-    # an edge the two blues ran together as one field. Assert the seam exists —
-    # this is invisible to every other check on the page.
-    seam = ab.evaluate("""() => {
-        const f = document.getElementById('facility'), ft = document.querySelector('.foot');
-        const cs = getComputedStyle(f);
-        return { same: cs.backgroundColor === getComputedStyle(ft).backgroundColor,
-                 w: parseFloat(cs.borderBottomWidth),
-                 color: cs.borderBottomColor };
+    # Copy on the left at the page margin, picture on the right — and the copy
+    # must come FIRST in the DOM, so the heading leads on a phone and in a
+    # screen reader rather than trailing the illustration.
+    order = ab.evaluate("""() => {
+        const s = document.querySelector('.about-split');
+        return [...s.children].map(c => c.className.split(' ')[0]);
     }""")
-    check_true("facility and footer really are the same blue", seam["same"])
-    check_true("so the facility band carries a visible bottom edge", seam["w"] >= 2)
-    check("and that edge is brand orange", seam["color"], "rgb(239, 108, 0)")
+    check("copy comes before the picture", order[0], "about-split__body")
+    sides = ab.evaluate("""() => {
+        const b = document.querySelector('.about-split__body').getBoundingClientRect();
+        const f = document.querySelector('.about-split__figure').getBoundingClientRect();
+        return { copyLeft: Math.round(b.left), figLeft: Math.round(f.left) };
+    }""")
+    check_true("copy sits left of the picture", sides["copyLeft"] < sides["figLeft"])
+
+    # The illustration is exactly 4:5 and is the one image on the site that must
+    # not be cropped — the ball and the tactics board are what make it read as a
+    # coach, and both sit in the corners.
+    crop = ab.evaluate("""() => {
+        const img = document.querySelector('.about-split__figure img');
+        const box = document.querySelector('.about-split__figure').getBoundingClientRect();
+        return Math.abs((box.width / box.height) - (img.naturalWidth / img.naturalHeight));
+    }""")
+    check_true(f"coach illustration is not cropped (ratio delta {crop:.3f})", crop < 0.02)
+    check_true("and it is the coach artwork, not the old photo",
+               "coach" in ab.locator(".about-split__figure img").get_attribute("src"))
+
+    # The facility band ends on the same colour the footer begins on, so with no
+    # tonal difference the two blues ran together as one endless field. The fix
+    # is a genuine step in value rather than a drawn rule, so assert the two
+    # grounds actually differ — this is invisible to every other check here.
+    step = ab.evaluate("""() => {
+        const scrim = getComputedStyle(document.querySelector('#facility .arena__scrim'));
+        const foot  = getComputedStyle(document.querySelector('.foot')).backgroundColor;
+        // last colour stop of the scrim gradient is what meets the footer
+        const stops = scrim.backgroundImage.match(/rgba?\\([^)]*\\)/g) || [];
+        return { last: stops[stops.length - 1], foot };
+    }""")
+    check_true("the scrim ends on a different value than the footer",
+               step["last"] is not None and "42, 120" not in step["last"])
+    check_true("and it resolves to the lighter royal", "0, 57, 165" in (step["last"] or ""))
+    check("no drawn rule is needed at the seam",
+          ab.evaluate("() => parseFloat(getComputedStyle("
+                      "document.getElementById('facility')).borderBottomWidth)"), 0)
     ab.close()
 
     b.close()
