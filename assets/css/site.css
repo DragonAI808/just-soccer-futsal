@@ -233,49 +233,29 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
    screen, permanently fixed. Out of flow it can be as large as it likes and
    overhangs the bar instead, which is how a club badge usually sits on a
    sports header. The brand link reserves the width with padding. */
-.brand{
-  position:relative;
-  display:flex; align-items:center; gap:.7rem; color:var(--paper);
-  padding-left:calc(6.2rem + .75rem);
-  min-height:2.6rem;
-}
-/* No white chip any more. It only ever existed because the old badge was a
-   full-colour mark on an opaque white ground — keying that white out would have
-   taken the ball's own white panels with it. The replacement has a real alpha
-   channel, so the badge sits straight on the blue. */
-/* The overhang needs a ground once the bar is opaque, or page text scrolls
-   through the badge's transparent gaps — measured: it lands on the "Visit the
-   court" heading at one scroll position. This is a royal tab that extends the
-   stuck bar down behind the badge only. Over the hero the bar is transparent
-   and the badge is meant to float on the photograph, so the tab stays hidden
-   there and fades in with the bar's own background transition. */
-#nav .brand::before{
-  content:''; position:absolute; z-index:-1;
-  left:calc(var(--pad) * -1);
-  top:-.6rem;
-  width:calc(var(--pad) + 6.2rem + 1rem);
-  height:7.4rem;
-  background:rgba(var(--royal-rgb),.97);
-  opacity:0;
-  transition:opacity .4s var(--ease);
-  pointer-events:none;
-}
-#nav.is-stuck .brand::before, #nav.is-menu-open .brand::before{ opacity:1; }
+/* The badge sits IN the bar's flow, so badge and bar are always sized in
+   relation to each other. Two earlier attempts failed for opposite reasons:
+   in flow at a fixed 6.2rem the bar grew to a permanent 112px; out of flow
+   the badge overhung a small bar and needed an opaque tab behind it, which
+   read as a blue block dropped onto the content.
 
-/* Anchored to the top of the bar rather than centred on it: centring a 99px
-   badge in a 66px bar would push a third of it above the viewport, where it
-   would simply be cut off. Anchoring means the whole overhang goes downward,
-   where there is room. */
-.brand__mark{
-  position:absolute; left:0; top:.15rem;
-  width:6.2rem; height:auto;
-  transform-origin:50% 50%;
-  transition:transform .3s var(--ease);
+   Instead the pair shrinks together. Large at the top of the page, where it
+   sits over the hero photograph and costs nothing; compact once you start
+   reading, which is the only time a fixed bar's height is actually expensive.
+   The badge has no white ground to key out - it has a real alpha channel - so
+   it needs no chip and no plate at either size. */
+.brand{
+  display:flex; align-items:center; gap:.7rem; color:var(--paper);
 }
+.brand__mark{
+  width:6.2rem; height:auto; flex:none;
+  transition:width .4s var(--ease), transform .3s var(--ease);
+}
+#nav.is-stuck .brand__mark{ width:3.4rem; }
+
 @media (max-width:560px){
-  .brand{ padding-left:calc(4.4rem + .6rem); }
   .brand__mark{ width:4.4rem; }
-  #nav .brand::before{ width:calc(var(--pad) + 4.4rem + .8rem); height:5.4rem; }
+  #nav.is-stuck .brand__mark{ width:2.9rem; }
 }
 .brand:hover .brand__mark{ transform:rotate(-6deg) scale(1.05); }
 .brand__txt{

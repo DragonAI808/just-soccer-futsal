@@ -182,20 +182,21 @@ audience actually uses.
 
 ### The badge
 
-The header badge is **absolutely positioned**, so it does not drive the bar's
-height. In flow at 6.2rem it took the header from 66px to 112px - 12% of a
-laptop screen, permanently fixed. Out of flow the bar sits at ~61px and the
-badge overhangs it by 44px instead, the way a club crest usually sits on a
-sports header.
+The header badge and the bar **shrink together**. At the top of the page the
+badge is 6.2rem and the bar is ~112px; once the nav sticks, the badge goes to
+3.4rem and the bar to ~64px - essentially where it started.
 
-It is anchored to the TOP of the bar, not centred: centring a 99px badge in a
-61px bar pushes a third of it above the viewport, where it is simply cut off.
+Two earlier attempts are worth recording so they are not retried:
 
-The overhang gets a royal tab () that fades in only when
-the bar is stuck. Without it, page text scrolls through the badge's transparent
-gaps - measured, it landed on the "Visit the court" heading. Over the hero the
-bar is transparent and the badge is meant to float on the photograph, so the
-tab stays hidden there.
+- **Fixed 6.2rem badge, in flow.** The bar became a permanent 112px, 12% of a
+  laptop screen at every scroll position.
+- **Badge out of flow, overhanging a small bar.** Page text then scrolled
+  through the badge's transparent gaps, so it needed an opaque tab behind it -
+  and that tab read as a blue block dropped onto the content below.
+
+Sizing them together avoids both. The large badge lands over the hero
+photograph, where a tall bar costs nothing; the compact one applies while
+reading, which is the only time a fixed bar's height is actually expensive.
 
 `assets/img/logo-source.png` is 1298×1212 **with a real alpha channel**, so the
 badge sits directly on any ground — no chip, no plate, no knockout. Its lettering
