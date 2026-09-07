@@ -880,7 +880,14 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
   font-size:.7rem; font-weight:700; letter-spacing:.18em;
   text-transform:uppercase; color:var(--ink-soft);
 }
-.visit__row dd{ margin:0; font-size:1.02rem; }
+/* coachernie@justsoccerfutsal.org is 31 characters with nowhere to break. Against
+   a fixed 7.5rem label column it needed 372px, which overflowed the document on
+   anything under ~400px wide — an iPhone SE got a horizontal scrollbar. */
+.visit__row dd{ margin:0; font-size:1.02rem; overflow-wrap:anywhere; }
+@media (max-width:560px){
+  .visit__row{ grid-template-columns:1fr; gap:.15rem; }
+  .visit__row dt{ font-size:.66rem; }
+}
 .visit__row a{ text-decoration:underline; text-underline-offset:3px; text-decoration-color:var(--line); }
 .visit__row a:hover{ color:var(--orange-ink); text-decoration-color:currentColor; }
 .visit__row a:active{ opacity:.7; }
@@ -926,11 +933,11 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
    the width that the brand column was leaving empty. */
 .foot__sign{
   font-family:var(--display); text-transform:uppercase;
-  font-size:clamp(1.9rem,1rem + 3.6vw,4rem);
-  line-height:.95; letter-spacing:.01em;
+  font-size:clamp(1.6rem,9.75vw,12rem);
+  line-height:.9; letter-spacing:.005em;
   color:var(--paper);
-  margin:clamp(3rem,7vh,4.5rem) 0 clamp(2.5rem,6vh,3.75rem);
-  max-width:14ch;
+  margin:clamp(2.5rem,6vh,4rem) 0 clamp(2.5rem,6vh,3.75rem);
+  white-space:nowrap;
 }
 .foot__wrap{
   max-width:var(--maxw); margin-inline:auto;

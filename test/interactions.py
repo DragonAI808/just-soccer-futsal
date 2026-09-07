@@ -319,6 +319,27 @@ with sync_playwright() as p:
     check("phone hero uses the portrait crop",
           "portrait" in ph.locator(".hero__media").evaluate("e => e.currentSrc"), True)
 
+    # Narrow widths, WITHOUT mobile emulation. Playwright's is_mobile pins
+    # innerWidth at 392 whatever viewport you ask for, so a phone-emulated page
+    # cannot see an overflow below that — which is how a real one hid here for
+    # ages, reading as a harmless 2px at 390 while an iPhone SE at 375 got a
+    # horizontal scrollbar. Measure the document itself at true widths.
+    for narrow in (320, 375):
+        nb = b.new_page(viewport={"width": narrow, "height": 900})
+        nb.goto(URL)
+        nb.wait_for_load_state("networkidle")
+        settled(nb)
+        nh = nb.evaluate("document.documentElement.scrollHeight")
+        ny = 0
+        while ny < nh:                       # walk it; reveals change widths
+            nb.evaluate("y => window.scrollTo({top:y, behavior:'instant'})", ny)
+            nb.wait_for_timeout(60)
+            ny += 800
+        over = nb.evaluate(
+            "document.documentElement.scrollWidth - document.documentElement.clientWidth")
+        check(f"no document overflow at {narrow}px", over, 0)
+        nb.close()
+
     b.close()
 
 print(f"\n{sum(results)}/{len(results)} passed")
