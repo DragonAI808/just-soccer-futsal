@@ -118,6 +118,25 @@ Three things that are load-bearing and not obvious:
   box, so its rect is all zeros. That silently pinned it at `scale(1)` once
   already. If a zoom ever stops working, look there first.
 
+## Cache busting — bump this when you change CSS or JS
+
+`index.html` loads the stylesheet and script with a version marker:
+
+```html
+<link rel="stylesheet" href="assets/css/site.css?v=4">
+<script src="assets/js/site.js?v=4"></script>
+```
+
+**Increment both numbers whenever you edit `site.css` or `site.js`.** GitHub
+Pages serves those files with `Cache-Control: max-age=600`, and phone browsers
+routinely hold them far longer than that. Without a changed URL a returning
+visitor keeps the old stylesheet and simply does not see your change — which is
+exactly what happened after the phone-layout fix: the deployed CSS was correct
+and the phone was still rendering the previous one.
+
+`index.html` itself is served with a short cache, so the new marker propagates
+on the next page load. Images are content-named already and do not need this.
+
 ## Before this goes live — please read
 
 ### 1. The photography is yours now — but check the resolution ceiling
