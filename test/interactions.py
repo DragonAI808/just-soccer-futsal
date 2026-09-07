@@ -156,8 +156,19 @@ with sync_playwright() as p:
                  "info@justsoccerfutsal.org", "5,000"]:
         check_true(f"page still states {fact!r}", fact in body)
     check_true("phone is dialable", "tel:+19515251846" in html)
-    check_true("booking points at the real booking page",
-               "justsoccerfutsal.org/session" in html)
+
+    # Bookings go to Squarespace Scheduling, not to a page on their own site.
+    # There are five of these on the home page and two more on About; asserting
+    # the SET rather than "one of them is right" is the point — a missed one
+    # sends somebody to a dead URL and nothing else here would notice.
+    BOOKING = "https://app.squarespacescheduling.com/schedule/9e3bd3ec"
+    book = pg.evaluate("""() => [...document.querySelectorAll('a')]
+        .filter(a => a.textContent.trim().toLowerCase() === 'book a session')
+        .map(a => a.getAttribute('href'))""")
+    check_true(f"home has every Book a session link ({len(book)} found)", len(book) >= 5)
+    check("and all of them point at Squarespace Scheduling", sorted(set(book)), [BOOKING])
+    check("no link still points at the retired /session page",
+          [h for h in book if "justsoccerfutsal.org/session" in h], [])
 
     # Every in-page nav target must exist, or the nav silently does nothing.
     missing = pg.evaluate("""() => [...document.querySelectorAll('a[href^="#"]')]
@@ -467,6 +478,11 @@ with sync_playwright() as p:
 
     # Both pages have to reach each other, or the nav is decorative.
     check_true("About links home", ab.locator('a[href="index.html"]').count() > 0)
+    abook = ab.evaluate("""() => [...document.querySelectorAll('a')]
+        .filter(a => a.textContent.trim().toLowerCase() === 'book a session')
+        .map(a => a.getAttribute('href'))""")
+    check("About's booking links go to Squarespace too", sorted(set(abook)),
+          ["https://app.squarespacescheduling.com/schedule/9e3bd3ec"])
     hm = b.new_page(viewport={"width": 1440, "height": 900})
     hm.goto(URL)
     hm.wait_for_load_state("networkidle")

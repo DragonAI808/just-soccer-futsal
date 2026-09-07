@@ -366,7 +366,22 @@ quietly becoming permanent. Add real ones; don't let placeholder ones ship.
 Program schedules are written as "call for the current schedule" rather than
 naming days, for the same reason. Fill those in once you have them.
 
-### 6. The waiver PDF is a blank template — keep it that way
+### 6. Bookings go off-site, to Squarespace Scheduling
+
+Every **Book a session** button points at
+`https://app.squarespacescheduling.com/schedule/9e3bd3ec` - **seven of them**:
+nav, hero, Programs head, Visit card and footer on `index.html`, plus nav and
+footer on `about.html`. They used to point at `justsoccerfutsal.org/session`.
+
+If the scheduling link ever changes, change all seven. `test/interactions.py`
+asserts the whole SET matches, not that one of them is right, so a missed link
+fails loudly rather than quietly sending somebody to a dead URL.
+
+They open in the same tab, matching every other external link on the site
+(Instagram, Facebook, Maps). The waiver PDF is the single exception, and only
+because a PDF viewer taking over the tab is a different kind of dead end.
+
+### 7. The waiver PDF is a blank template — keep it that way
 
 `assets/docs/clinic-waiver.pdf` is the club's own "Just Soccer FC LLC Release
 and Waiver of Liability" form, supplied by Stewart and linked from the footer's
