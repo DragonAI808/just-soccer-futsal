@@ -50,6 +50,10 @@ function Get-PagesState {
   # stdout, so a bare --jq .status yields that JSON rather than nothing. Match
   # on the body instead of trusting emptiness.
   $out = (gh api "repos/$Repo/pages" 2>&1 | Out-String)
+  # gh exits non-zero on the 404 that means "Pages is disabled" - a correct,
+  # expected answer here. Clear it, or the script reports failure after a
+  # successful 'off'.
+  $global:LASTEXITCODE = 0
   if ($out -match '"status"\s*:\s*"built"')    { return 'built' }
   if ($out -match '"status"\s*:\s*"building"') { return 'building' }
   if ($out -match 'Not Found')                 { return 'disabled' }
@@ -118,3 +122,5 @@ switch ($Action) {
     Show-State
   }
 }
+
+exit 0
