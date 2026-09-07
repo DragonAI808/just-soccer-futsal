@@ -32,7 +32,11 @@ The badge is built from two things, and so is the page:
   different scales, always masked so they fade out. A flat, unmasked dot field
   reads as a bug rather than a texture.
 - **Painted court markings** — `.touchline`, a 3px chalk rule with the halfway
-  circle notched into it, used to separate sections. Plus `.hero__court`, the
+  circle notched into it, used to separate sections. The circle carries the club
+  badge, which is where a crest sits on a real court. Two things make that work:
+  the circle needs an **opaque** ground, or the rule is drawn straight across the
+  badge; and the badge has to fill roughly **80% of the circle** — at 60% it was
+  83px on a 1440 screen and the arced lettering and halftone read as a smudge. Plus `.hero__court`, the
   hero's mid plane: three drawn circles sitting behind the headline the way the
   badge's ring sits behind the ball.
 - **Netting** — `.hero__net`, a diamond mesh from two crossed

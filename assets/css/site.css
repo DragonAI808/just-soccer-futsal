@@ -107,14 +107,27 @@ ul{ list-style:none; padding:0; }
 }
 .touchline::after{
   content:''; position:absolute; left:50%; top:50%;
-  width:clamp(3.5rem,9vw,7rem); aspect-ratio:1;
+  width:clamp(5.4rem,12.5vw,9.6rem); aspect-ratio:1;
   transform:translate(-50%,-50%);
   border:3px solid var(--chalkline); border-radius:50%;
+  /* Opaque, not transparent: the touchline is drawn straight through the middle
+     of this circle, and without a ground the rule would cut across the badge. */
+  background:var(--paper);
 }
 /* on light grounds the chalk line has to be the ink hairline at full strength,
    or the halfway circle disappears entirely against white */
 .touchline--ink{ border-color:rgba(var(--royal-rgb),.28); opacity:1; }
 .touchline--ink::after{ border-color:rgba(var(--royal-rgb),.28); }
+
+/* The club badge in the centre circle — which is where a crest sits on a real
+   court. Kept modest: this is a breath between sections, so the mark reads as
+   a maker's stamp rather than as a second logo competing with the header. */
+.touchline__mark{
+  position:absolute; left:50%; top:50%;
+  transform:translate(-50%,-50%);
+  width:clamp(4.4rem,10.2vw,7.9rem); height:auto;
+  z-index:1; pointer-events:none;
+}
 
 /* ---------- shared type ---------- */
 .eyebrow{
