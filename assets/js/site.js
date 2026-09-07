@@ -43,17 +43,31 @@
     if (!t || t.dataset.done) return;
     t.dataset.done = '1';
 
-    var words = t.textContent.trim().split(/\s+/);
+    // Walk child NODES, not textContent. Reading textContent flattened any
+    // <br> in the markup away, so the only way to influence where the headline
+    // broke was to fight it with max-width and hope. Walking the nodes lets the
+    // HTML say exactly where the line ends.
+    var nodes = Array.prototype.slice.call(t.childNodes);
     t.textContent = '';
-    words.forEach(function (w, wi) {
-      var fly = document.createElement('span');
-      fly.className = 'wfly';
-      fly.textContent = w;
-      // the photograph holds alone for a beat, then the words arrive in
-      // sequence rather than as one block
-      fly.style.transitionDelay = (0.35 + wi * 0.11) + 's';
-      t.appendChild(fly);
-      if (wi < words.length - 1) t.appendChild(document.createTextNode(' '));
+    var n = 0;
+
+    nodes.forEach(function (node) {
+      if (node.nodeType === 1 && node.tagName === 'BR') {
+        t.appendChild(document.createElement('br'));
+        return;
+      }
+      var words = (node.textContent || '').trim().split(/\s+/).filter(Boolean);
+      words.forEach(function (w, wi) {
+        var fly = document.createElement('span');
+        fly.className = 'wfly';
+        fly.textContent = w;
+        // the photograph holds alone for a beat, then the words arrive in
+        // sequence rather than as one block
+        fly.style.transitionDelay = (0.35 + n * 0.11) + 's';
+        n++;
+        t.appendChild(fly);
+        if (wi < words.length - 1) t.appendChild(document.createTextNode(' '));
+      });
     });
     requestAnimationFrame(function () {
       requestAnimationFrame(function () { t.classList.add('is-in'); });
