@@ -729,9 +729,15 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
   .split__figure{ align-self:start; }
   .split__body{ grid-column:1 / -1; order:1; max-width:52ch; margin-inline:0; }
 }
+/* Phones get the bracketing back: photo, text, photo, each full width. Two
+   pictures side by side at this size land around 170px each and neither reads;
+   stacked they are legible, and the pair still frames the copy the way it does
+   on the triptych. The DOM order is already photo / text / photo, so this is
+   just a single column — no reordering needed. */
 @media (max-width:520px){
-  .split{ grid-template-columns:1fr; }
-  .split__figure:last-of-type{ display:none; }   /* one is enough on a phone */
+  .split{ grid-template-columns:1fr; gap:2rem; }
+  .split__body{ order:0; }        /* cancel the tablet reorder; follow DOM order */
+  .split__figure{ aspect-ratio:4 / 3; }   /* landscape reads wider on a narrow screen */
 }
 
 /* ==========================================================================
