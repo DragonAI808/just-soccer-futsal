@@ -68,7 +68,7 @@ suite enforces parts of it.
 |---|---|
 | Page head | Their own sign-off, "Live your passion! Play the game!", as the h1. Solid nav — see below. |
 | Mission | **Their words, verbatim.** See the warning under it. |
-| Founder | Coach Ernie. Copy left at the page margin, the brand illustration right. |
+| Founder | Coach Ernie. Copy left at the page margin, the brand illustration right, and his own email address below the copy. |
 | Facility | The arena band reused from the home page, left-aligned because it holds body copy here rather than four stats. |
 
 The copy came from `justsoccerfutsal.org/about`. The home page already carries a

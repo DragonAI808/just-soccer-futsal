@@ -999,6 +999,36 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
 .about-split__body{ max-width:52ch; }
 .about-split__body .h2{ margin-bottom:1.3rem; }
 .about-split__p{ margin-top:1.1rem; color:var(--ink-soft); }
+
+/* Coach Ernie's address, sitting where the reader has just finished reading
+   about him. The label is the eyebrow's small-caps voice so the block reads as
+   a labelled field rather than a stray line of copy. */
+.about-split__contact{
+  margin-top:clamp(1.8rem,4vh,2.4rem);
+  display:flex; flex-direction:column; gap:.35rem;
+  padding-top:1.4rem; border-top:3px solid var(--line);
+}
+.about-split__contact span{
+  font-size:.68rem; font-weight:700; letter-spacing:.22em;
+  text-transform:uppercase; color:var(--ink-soft);
+}
+.about-split__mail{
+  align-self:start;
+  /* padded to clear the 24px target minimum: at 1.05rem the inline box is 26px
+     but the underline sits on the very edge of it, so the extra makes the
+     whole thing comfortably tappable rather than only just legal */
+  padding:.25rem 0 .3rem;
+  font-size:1.05rem; font-weight:600;
+  /* --orange-ink, not --orange: 4.6:1 on white against 3.0:1, and this is
+     body-sized text, so it needs the darker one */
+  color:var(--orange-ink);
+  border-bottom:2px solid rgba(var(--orange-rgb),.38);
+  overflow-wrap:anywhere;            /* 31 characters with nowhere to break */
+  transition:color .3s var(--ease), border-color .3s var(--ease);
+}
+.about-split__mail:hover, .about-split__mail:focus-visible{
+  color:var(--orange); border-color:var(--orange);
+}
 @media (max-width:880px){
   .about-split{ grid-template-columns:1fr; gap:2.5rem; }
   /* stays 4:5 - a landscape override here would crop the illustration, which

@@ -461,6 +461,23 @@ with sync_playwright() as p:
     check_true("founder section names Hernan Garcia", "Hernan Garcia" in founder)
     check_true("and Coach Ernie", "Coach Ernie" in founder)
 
+    # His own address, not the general info@ one, in the section that is about
+    # him. A mailto must NOT carry target — it hands off to a mail client, and
+    # a target on one leaves an empty tab behind in some browsers.
+    mail = ab.locator(".about-split__mail")
+    check("Coach Ernie's email is in the founder section", mail.count(), 1)
+    check("it mails him directly", mail.get_attribute("href"),
+          "mailto:coachernie@justsoccerfutsal.org")
+    check("the address is visible, not hidden behind a label",
+          mail.inner_text().strip(), "coachernie@justsoccerfutsal.org")
+    check("no target on a mailto", mail.get_attribute("target"), None)
+    mbox = mail.evaluate("e => { const r = e.getBoundingClientRect();"
+                         " return [Math.round(r.width), Math.round(r.height)]; }")
+    check_true(f"it clears the 24px target minimum ({mbox[0]}x{mbox[1]})", mbox[1] >= 24)
+    # --orange-ink (4.6:1 on white), never --orange (3.0:1) — this is body-sized.
+    check("it uses the darker orange that passes on white",
+          mail.evaluate("e => getComputedStyle(e).color"), "rgb(194, 84, 0)")
+
     facility = ab.locator("#facility").inner_text()
     check_true("facility keeps the 5,000 sq ft line", "5,000 sq ft" in facility)
 
