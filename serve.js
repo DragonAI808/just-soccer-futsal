@@ -20,7 +20,12 @@ const TYPES = {
   '.webp': 'image/webp',
   '.mp4' : 'video/mp4',
   '.woff2': 'font/woff2',
-  '.ico' : 'image/x-icon'
+  '.ico' : 'image/x-icon',
+  // Without this the waiver falls through to octet-stream and the browser
+  // downloads it instead of showing it, which is not what GitHub Pages does —
+  // so local testing would disagree with the live site about the one link
+  // whose whole job is to open in a tab.
+  '.pdf' : 'application/pdf'
 };
 
 http.createServer((req, res) => {

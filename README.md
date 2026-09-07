@@ -26,6 +26,7 @@ assets/img/logo-source.png  the club badge, 1298x1212 with alpha (master)
 assets/img/logo-{720,260}.webp  derived sizes actually used by the page
 assets/img/favicon-180.png  tab icon (the ball, cropped from the master)
 assets/img/og-1200x630.jpg  social share card
+assets/docs/clinic-waiver.pdf   the club's liability waiver, linked from the footer
 assets/video/               empty; drop clips here when there are any
 serve.js                    local preview server
 tools/add-clip.sh           ffmpeg pipeline for making a raw clip web-ready
@@ -309,6 +310,26 @@ quietly becoming permanent. Add real ones; don't let placeholder ones ship.
 
 Program schedules are written as "call for the current schedule" rather than
 naming days, for the same reason. Fill those in once you have them.
+
+### 6. The waiver PDF is a blank template — keep it that way
+
+`assets/docs/clinic-waiver.pdf` is the club's own "Just Soccer FC LLC Release
+and Waiver of Liability" form, supplied by Stewart and linked from the footer's
+*Get on the court* column. It is a **blank** template: no names, no signatures,
+no participant details. That is the only version that belongs on a public URL —
+if a completed one ever replaces it, it publishes somebody's personal data, and
+a signed minor release publishes a child's.
+
+The link is `target="_blank"` on purpose so a PDF viewer never swallows the site
+tab, with `rel="noopener"` and an `aria-label` that says it opens a new tab.
+`serve.js` maps `.pdf` so local preview matches what GitHub Pages sends; without
+it the file downloads instead of opening and the new tab looks broken.
+
+To replace it, drop the new file at the same path and keep the name — the
+footer link and `test/interactions.py` both point at `clinic-waiver.pdf`.
+
+Note the legal entity on the form is "Just Soccer FC LLC" while the site trades
+as "Just Soccer Futsal Center". That is presumably correct, but worth a glance.
 
 ## Running the tests
 

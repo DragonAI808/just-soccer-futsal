@@ -398,6 +398,27 @@ with sync_playwright() as p:
         return bad;
     }""")
     check("no interactive target under 24px", small, [])
+
+    print("\n[12] THE WAIVER PDF")
+
+    wv = cw.locator('a[href$="clinic-waiver.pdf"]')
+    check("the footer links the waiver", wv.count(), 1)
+    # A PDF that swallows the site tab is the failure mode this link exists to
+    # avoid, so target and rel are asserted, not assumed.
+    check("it opens in its own tab", wv.get_attribute("target"), "_blank")
+    check_true("it carries rel=noopener", "noopener" in (wv.get_attribute("rel") or ""))
+    # WCAG 3.2.5: a link that moves you somewhere unexpected has to say so.
+    check_true("it announces the new tab",
+               "new tab" in (wv.get_attribute("aria-label") or "").lower())
+    check_true("(PDF) is visible in the link text", "PDF" in wv.inner_text())
+
+    # The file has to exist and be served AS a PDF. Falling through to
+    # octet-stream makes the browser download it instead of opening it, which
+    # defeats the whole point of the new tab.
+    pdf = cw.request.get(URL + "/assets/docs/clinic-waiver.pdf")
+    check("the file is actually there", pdf.status, 200)
+    check_true("served as application/pdf", "application/pdf" in pdf.headers.get("content-type", ""))
+    check_true("and it is a real PDF", pdf.body()[:5] == b"%PDF-")
     cw.close()
 
     b.close()

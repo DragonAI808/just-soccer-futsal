@@ -68,7 +68,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="assets/css/site.css?v=16">
+<link rel="stylesheet" href="assets/css/site.css?v=17">
 
 <!-- The hero photograph is the LCP element, so it is fetched at the highest
      priority the browser will give it rather than waiting on the CSS. -->
@@ -520,6 +520,12 @@
       <h4>Get on the court</h4>
       <ul>
         <li><a href="https://www.justsoccerfutsal.org/session" rel="noopener">Book a session</a></li>
+        <!-- Opens in its own tab so nobody loses the site to a PDF viewer, and
+             the aria-label says so: a link that moves you somewhere unexpected
+             has to announce it (WCAG 3.2.5). "(PDF)" is visible for the same
+             reason - it warns before the click, not after. -->
+        <li><a href="assets/docs/clinic-waiver.pdf" target="_blank" rel="noopener"
+               aria-label="Clinic waiver, PDF, opens in a new tab">Clinic waiver (PDF)</a></li>
         <li><a href="tel:+19515251846">(951) 525-1846</a></li>
         <li><a href="mailto:info@justsoccerfutsal.org">info@justsoccerfutsal.org</a></li>
       </ul>
@@ -531,6 +537,6 @@
   </div>
 </footer>
 
-<script src="assets/js/site.js?v=16"></script>
+<script src="assets/js/site.js?v=17"></script>
 </body>
 </html>
