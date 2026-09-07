@@ -710,6 +710,14 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
 .split__badge{
   width:clamp(10rem,22vw,17rem); margin-bottom:2rem;
 }
+/* On the triptych it is the section's centrepiece and has to sit on the axis
+   between the two photographs. The text block is already centred in the middle
+   column, but the badge is a block element and was left-aligned inside it —
+   88px off the true centre. Only on this layout: when the section stacks, the
+   badge belongs on the left margin with the copy it heads. */
+@media (min-width:881px){
+  .split__badge{ margin-inline:auto; }
+}
 /* Narrow: the two photographs sit side by side ABOVE the text rather than
    sandwiching it. Stacked, image-text-image put the second picture below the
    list where it read as an orphan. */
