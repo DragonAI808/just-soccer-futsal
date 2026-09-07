@@ -52,6 +52,7 @@ suite enforces parts of it.
 | Futsal | Four cells explaining what futsal actually is, as distinct from indoor soccer. |
 | Programs | The six things that run, numbered in outlined **jersey numerals**. |
 | Arena | Full-bleed band of the hall whose photograph **zooms out as it arrives** — the opposite move to the hero, so the trick does not read as the same effect twice. |
+| **Latest** | Two Instagram reels as **click-to-load facades**, under the scoreboard. Meta is not contacted until someone plays one. Meant to be swapped — the posts are dated. |
 | Story | Coach Ernie and why the place exists — a **triptych**: photograph, text, photograph. Both pictures render at identical size and stretch to the height of the text. |
 | Visit | Address, phone, both email addresses, map link. |
 | Footer | Badge, nav, socials, credit. |
@@ -119,6 +120,40 @@ Three things that are load-bearing and not obvious:
   box, so its rect is all zeros. That silently pinned it at `scale(1)` once
   already. If a zoom ever stops working, look there first.
 
+## Swapping the Instagram reels
+
+The two reels under the scoreboard are **facades**: a self-hosted cover image
+plus a play badge. Instagram is contacted only when a visitor clicks one. To
+change a reel you need its id (the code in its URL) and a cover image.
+
+Get the cover from Instagram's own oEmbed endpoint — not a scraper, not one of
+those third-party downloader sites:
+
+```powershell
+curl -s "https://www.instagram.com/api/v1/oembed/?url=https://www.instagram.com/reel/REEL_ID/"
+```
+
+Take `thumbnail_url` from the JSON, download it, then:
+
+```powershell
+ffmpeg -i cover.jpg -c:v libwebp -quality 82 -y assets/img/reel-NAME.webp
+ffmpeg -i cover.jpg -q:v 4 -y assets/img/reel-NAME.jpg
+```
+
+Then in `index.html` update that tile's `data-reel` id, its two image paths, the
+`alt` text and the `.reel__cap` line. Nothing in the CSS or JS changes.
+
+**Keep them current.** These posts are dated by nature — the Futsal Fridays reel
+literally says *"tomorrow"* in its Instagram caption, which is why the caption
+written on the site leaves that word out. A reel that was news in September
+reads as neglect by March.
+
+**Do not replace the facades with Instagram's stock embed code.** It pulls ~1MB
+of Meta script and sets a tracking cookie on every visitor, whether or not they
+ever play a reel — and the page would look identical either way, which is
+exactly why it would go unnoticed. `test/interactions.py` asserts that no Meta
+request happens before a click, so that swap fails the suite.
+
 ## Taking the live site off and on
 
 `tools/site.ps1` is the switch. Run it from PowerShell in the project root:
@@ -165,8 +200,8 @@ it, then verifies the URL actually returns 200 before telling you it is live.
 `index.html` loads the stylesheet and script with a version marker:
 
 ```html
-<link rel="stylesheet" href="assets/css/site.css?v=8">
-<script src="assets/js/site.js?v=8"></script>
+<link rel="stylesheet" href="assets/css/site.css?v=9">
+<script src="assets/js/site.js?v=9"></script>
 ```
 
 **Increment both numbers whenever you edit `site.css` or `site.js`.** GitHub
@@ -281,7 +316,7 @@ naming days, for the same reason. Fill those in once you have them.
 py -3 test/interactions.py
 ```
 
-Seventy-five assertions across desktop and phone: that the multiplane camera actually
+Eighty-four assertions across desktop and phone: that the multiplane camera actually
 scales, that the statement lights up, that the mobile menu opens and closes and
 restores body scroll, that nothing overflows sideways unclipped, that every
 in-page link resolves, that the real contact details are still on the page, and

@@ -68,7 +68,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="assets/css/site.css?v=8">
+<link rel="stylesheet" href="assets/css/site.css?v=9">
 
 <!-- The hero photograph is the LCP element, so it is fetched at the highest
      priority the browser will give it rather than waiting on the CSS. -->
@@ -206,6 +206,59 @@
       <a class="btn" href="tel:+19515251846">Call the court</a>
     </div>
   </div>
+</section>
+
+<!-- ==========================================================
+     LATEST — Instagram reels, click to load.
+     These are FACADES: a self-hosted cover plus a play badge. Nothing from
+     Meta is requested until someone actually clicks one, so the page sets no
+     third-party cookies and carries no embed script for the great majority of
+     visitors who never open a reel.
+     This block is meant to be swapped. The posts are dated by nature — one of
+     them literally says "tomorrow" — so they belong in a slot that is expected
+     to change, not baked into an evergreen section.
+     ========================================================== -->
+<section class="latest" id="latest">
+  <div class="latest__head">
+    <p class="eyebrow" data-reveal>Latest from the court</p>
+    <a class="latest__all" href="https://www.instagram.com/justsoccerfutsal" rel="noopener" data-reveal>
+      See all on Instagram &rarr;
+    </a>
+  </div>
+
+  <div class="latest__row">
+    <article class="reel" data-reel="DcAqWheMAH-" data-reveal>
+      <button class="reel__btn" type="button"
+              aria-label="Play the Futsal Fridays reel from Instagram. Opens Instagram's player.">
+        <picture>
+          <source type="image/webp" srcset="assets/img/reel-fridays.webp">
+          <img src="assets/img/reel-fridays.jpg" width="640" height="1136" loading="lazy" decoding="async"
+               alt="Players in green bibs on the blue court during a Futsal Fridays session.">
+        </picture>
+        <span class="reel__play" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>
+        </span>
+      </button>
+      <p class="reel__cap">Futsal Fridays &mdash; 6:45pm, 14yrs+, high school &amp; college night</p>
+    </article>
+
+    <article class="reel" data-reel="Dch6fYXsBA8" data-reveal style="--d:.1s">
+      <button class="reel__btn" type="button"
+              aria-label="Play the new adidas futsal balls reel from Instagram. Opens Instagram's player.">
+        <picture>
+          <source type="image/webp" srcset="assets/img/reel-balls.webp">
+          <img src="assets/img/reel-balls.jpg" width="640" height="1136" loading="lazy" decoding="async"
+               alt="Coach Valentina holding one of the new adidas Trionda Sala training balls.">
+        </picture>
+        <span class="reel__play" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>
+        </span>
+      </button>
+      <p class="reel__cap">New adidas Trionda Sala training balls on the court</p>
+    </article>
+  </div>
+
+  <p class="latest__note">Reels load from Instagram only when you play them.</p>
 </section>
 
 <div class="touchline touchline--ink" aria-hidden="true"></div>
@@ -475,6 +528,6 @@
   </div>
 </footer>
 
-<script src="assets/js/site.js?v=8"></script>
+<script src="assets/js/site.js?v=9"></script>
 </body>
 </html>

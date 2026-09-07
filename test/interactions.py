@@ -245,8 +245,52 @@ with sync_playwright() as p:
     check_true("og:image is an absolute url",
                'content="https://www.justsoccerfutsal.org/assets/img/og-1200x630.jpg"' in html)
 
+    print("\n[8] INSTAGRAM REELS — facades, nothing loads until asked")
+    # The entire point of a facade is that Meta is not contacted on page load.
+    # If someone ever swaps these for Instagram's stock blockquote+script, every
+    # visitor gets ~1MB of Meta JS and a tracking cookie whether they watch or
+    # not — and the page would still look completely fine. Hence a network test
+    # rather than a DOM one. A fresh context, so cookies start empty.
+    ig_ctx = b.new_context(viewport={"width": 1440, "height": 950})
+    ig = ig_ctx.new_page()
+    seen_hosts = set()
+    ig.on("request", lambda r: seen_hosts.add(r.url.split("/")[2]))
+    ig.goto(URL)
+    ig.wait_for_load_state("networkidle")
+    settled(ig)
+    doc_h = ig.evaluate("document.documentElement.scrollHeight")
+    yy = 0
+    while yy < doc_h:                       # scroll the lot; lazy images fire
+        ig.evaluate("y => window.scrollTo({top:y, behavior:'instant'})", yy)
+        ig.wait_for_timeout(80)
+        yy += 700
+
+    def meta_hosts():
+        return sorted(h for h in seen_hosts
+                      if "instagram" in h or "facebook" in h or "cdninstagram" in h)
+
+    check("no Meta request on page load", meta_hosts(), [])
+    check("no cookies set on page load", len(ig_ctx.cookies()), 0)
+    check("both reels render as facades", ig.locator(".reel .reel__btn").count(), 2)
+    check("no live embed before a click", ig.locator(".reel.is-live").count(), 0)
+    # The covers must be self-hosted, or the facade leaks the request it exists to prevent.
+    covers = ig.evaluate("""() => [...document.querySelectorAll('.reel__btn img')]
+        .map(i => new URL(i.currentSrc, location.href).host)""")
+    check("reel covers are served from our own origin",
+          [h for h in covers if "localhost" not in h and "127.0.0.1" not in h], [])
+
+    ig.locator(".latest").scroll_into_view_if_needed()
+    ig.wait_for_timeout(400)
+    ig.locator(".reel").first.locator(".reel__btn").click()
+    ig.wait_for_timeout(6000)
+    check_true("clicking a reel marks it live", ig.locator(".reel.is-live").count() == 1)
+    check_true("clicking a reel reaches Instagram", len(meta_hosts()) > 0)
+    check_true("an embed iframe was built", ig.locator(".reel.is-live iframe").count() >= 1)
+    check("the other reel is still a facade", ig.locator(".reel:not(.is-live)").count(), 1)
+    ig_ctx.close()
+
     # ---------------- phone ----------------
-    print("\n[8] PHONE — menu + no sideways scroll")
+    print("\n[9] PHONE — menu + no sideways scroll")
     ph = b.new_page(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True)
     ph.goto(URL)
     ph.wait_for_load_state("networkidle")

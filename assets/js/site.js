@@ -346,7 +346,63 @@
   onScroll();
 
   /* ---------------------------------------------------------------
-     9. Small stuff
+     9. Instagram reels — click to load.
+
+        Nothing here talks to Meta until a visitor actually clicks a
+        reel. That is the entire point: the standard embed pulls
+        ~1MB of script and sets a tracking cookie that outlives the
+        visit, on every page view, for content most people never open.
+        A facade defers all of it to the moment it is wanted.
+
+        embed.js is fetched once and then reused; instgrm.Embeds.process()
+        is what converts a <blockquote class="instagram-media"> into the
+        real player, and it has to run AFTER the blockquote is in the DOM.
+     --------------------------------------------------------------- */
+  var igRequested = false;
+
+  function runInstagram() {
+    if (window.instgrm && window.instgrm.Embeds) {
+      window.instgrm.Embeds.process();
+      return;
+    }
+    if (igRequested) return;          // script is in flight; its onload will process
+    igRequested = true;
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.instagram.com/embed.js';
+    s.onload = function () {
+      if (window.instgrm && window.instgrm.Embeds) window.instgrm.Embeds.process();
+    };
+    s.onerror = function () {
+      // Instagram unreachable or blocked by a content blocker. Put the cover
+      // back rather than leaving an empty hole where the reel should be.
+      $$('.reel.is-live').forEach(function (c) { c.classList.remove('is-live'); });
+      igRequested = false;
+    };
+    document.body.appendChild(s);
+  }
+
+  $$('.reel').forEach(function (card) {
+    var btn = card.querySelector('.reel__btn');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      if (card.classList.contains('is-live')) return;
+      var id = card.dataset.reel;
+      if (!id) return;
+
+      var bq = document.createElement('blockquote');
+      bq.className = 'instagram-media';
+      bq.setAttribute('data-instgrm-permalink', 'https://www.instagram.com/reel/' + id + '/');
+      bq.setAttribute('data-instgrm-version', '14');
+      card.insertBefore(bq, card.firstChild);
+      card.classList.add('is-live');
+
+      runInstagram();
+    });
+  });
+
+  /* ---------------------------------------------------------------
+     10. Small stuff
      --------------------------------------------------------------- */
   var yr = $('#yr');
   if (yr) yr.textContent = new Date().getFullYear();
