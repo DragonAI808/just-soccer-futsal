@@ -908,26 +908,12 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
 .foot{
   position:relative;
   background:var(--royal-dp); color:rgba(var(--chalk-rgb),.74);
-  /* top padding seats the touchline INSIDE the footer. Flush at 0 the circle
-     straddled the seam and its upper half became a dark disc floating on the
-     chalk section above - a bubble, not a device. */
-  padding:clamp(2.4rem,5.5vh,3.6rem) var(--pad) 2rem;
+  /* All of the top space lives here now that the touchline is gone. It used to
+     be split between this padding and the headline margin, which stacked to
+     7.6rem of empty blue above the closing line. */
+  padding:clamp(2.8rem,7vh,4.6rem) var(--pad) 2rem;
   font-size:.9rem;
 }
-/* Touchline sits INSIDE the footer, not on the seam above it: the seam is a
-   chalk section meeting a royal one, and a circle needs a single ground to sit
-   on. Its own variant so the ring reads on dark and the disc matches the
-   footer rather than the paper the other divider sits on. */
-.touchline--foot{
-  border-color:rgba(var(--chalk-rgb),.20); opacity:1;
-  margin-inline:calc(var(--pad) * -1);
-}
-.touchline--foot::after{
-  border-color:rgba(var(--chalk-rgb),.20);
-  background:var(--royal-dp);
-  width:clamp(3rem,6vw,4.6rem);
-}
-
 /* The closing line. The footer had no display type at all, which is most of
    why it read as generic — every other section is Anton-led. This also fills
    the width that the brand column was leaving empty. */
@@ -936,7 +922,7 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
   font-size:clamp(1.6rem,9.75vw,12rem);
   line-height:.9; letter-spacing:.005em;
   color:var(--paper);
-  margin:clamp(2.5rem,6vh,4rem) 0 clamp(2.5rem,6vh,3.75rem);
+  margin:0 0 clamp(2.5rem,6vh,3.75rem);
   white-space:nowrap;
 }
 .foot__wrap{
