@@ -492,6 +492,40 @@ with sync_playwright() as p:
             over.append(w)
         nb.close()
     check("About does not overflow sideways at any width", over, [])
+
+    # The founder picture must clear the touchline BADGE, not just the rule.
+    # The circle hangs half its diameter below the line and the crest's halftone
+    # spray reaches past that again, so a gap measured to the line looked like a
+    # collision on screen.
+    clearance = ab.evaluate("""() => {
+        const mark = document.querySelector('.touchline__mark').getBoundingClientRect();
+        const fig  = document.querySelector('.about-split__figure').getBoundingClientRect();
+        return Math.round(fig.top - mark.bottom);
+    }""")
+    check_true(f"picture clears the divider badge ({clearance}px)", clearance >= 40)
+
+    # And it has to sit BESIDE the text, not tower over it. At 4:5 it stood
+    # twice the height of the column it pairs with.
+    ratio = ab.evaluate("""() => {
+        const f = document.querySelector('.about-split__figure').getBoundingClientRect().height;
+        const t = document.querySelector('.about-split__body').getBoundingClientRect().height;
+        return f / t;
+    }""")
+    check_true(f"picture is not more than 1.5x the text ({ratio:.2f}x)", ratio <= 1.5)
+
+    # The facility band ends on the same colour the footer begins on, so without
+    # an edge the two blues ran together as one field. Assert the seam exists —
+    # this is invisible to every other check on the page.
+    seam = ab.evaluate("""() => {
+        const f = document.getElementById('facility'), ft = document.querySelector('.foot');
+        const cs = getComputedStyle(f);
+        return { same: cs.backgroundColor === getComputedStyle(ft).backgroundColor,
+                 w: parseFloat(cs.borderBottomWidth),
+                 color: cs.borderBottomColor };
+    }""")
+    check_true("facility and footer really are the same blue", seam["same"])
+    check_true("so the facility band carries a visible bottom edge", seam["w"] >= 2)
+    check("and that edge is brand orange", seam["color"], "rgb(239, 108, 0)")
     ab.close()
 
     b.close()

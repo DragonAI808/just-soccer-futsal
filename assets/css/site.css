@@ -978,9 +978,19 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
   display:grid; grid-template-columns:1fr 1fr;
   gap:clamp(2rem,5vw,4.5rem); align-items:center;
   max-width:var(--maxw); margin-inline:auto;
-  padding:clamp(4rem,11vh,8rem) var(--pad);
+  /* The top value clears the TOUCHLINE BADGE above, not just the line. The
+     circle hangs half its diameter below the rule and the badge's halftone
+     spray reaches past that again, so measuring to the line left the picture
+     appearing to touch the crest. */
+  padding:clamp(5.5rem,14vh,9.5rem) var(--pad) clamp(4rem,11vh,8rem);
 }
-.about-split__figure{ margin:0; overflow:hidden; aspect-ratio:4 / 5; }
+/* Landscape, not the 4:5 portrait it started as. At 4:5 the picture stood 765px
+   against a 376px column of text - twice the height of the thing it is meant to
+   sit beside, which is what made the section feel lopsided rather than paired. */
+.about-split__figure{
+  margin:0; overflow:hidden; aspect-ratio:4 / 3;
+  max-height:clamp(17rem,52vh,30rem);
+}
 .about-split__figure img{ width:100%; height:100%; object-fit:cover; object-position:50% 45%; }
 .about-split__body{ max-width:52ch; }
 .about-split__body .h2{ margin-bottom:1.3rem; }
@@ -995,7 +1005,16 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
    centred lines rag on both edges with no left margin for the eye to return to
    — measurably slower to read and it looks like a caption. Same band, same
    photograph, left-aligned copy. */
-#facility{ text-align:left; }
+/* The band ends on rgb(1,42,120) and the footer BEGINS on rgb(1,42,120) — the
+   same value, so there was no seam at all and the two read as one endless blue
+   field. On the home page the footer is preceded by the chalk Visit section, so
+   the problem never arose there.
+
+   An orange rule, not a touchline: the chalk line's halfway circle was taken off
+   the home footer deliberately, and a white disc on this blue would be louder
+   still. This is the same 3px orange edge the nav carries when it sticks, so the
+   page opens and closes on the same mark. */
+#facility{ text-align:left; border-bottom:3px solid var(--orange); }
 /* The inner box is sized for the HEADLINE, the paragraphs are narrowed
    separately. Holding both to one measure forced "Street-style" to break at
    its own hyphen, which reads as a typo rather than a line break. */
