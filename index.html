@@ -68,7 +68,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="assets/css/site.css?v=11">
+<link rel="stylesheet" href="assets/css/site.css?v=12">
 
 <!-- The hero photograph is the LCP element, so it is fetched at the highest
      priority the browser will give it rather than waiting on the CSS. -->
@@ -491,11 +491,19 @@
 <!-- ==========================================================
      FOOTER
      ========================================================== -->
-<footer class="foot">
+<footer class="foot halftone halftone--bl halftone--chalk">
+  <!-- The footer was the one section with no court grammar in it, which is why
+       it read as though it came from a different site. A touchline across the
+       top joins it back on. No badge in this circle: the crest is already in
+       the brand column just below, and twice in one screen stops being a mark. -->
+  <div class="touchline touchline--foot" aria-hidden="true"></div>
+
+  <p class="foot__sign" data-reveal>See you on the court</p>
+
   <div class="foot__wrap">
     <div class="foot__brand">
-      <img class="foot__logo" src="assets/img/logo-260.webp" alt="Just Soccer Futsal Center" width="260" height="243" loading="lazy">
-      <p>210 Dupont Street<br>Corona, CA 92879</p>
+      <img class="foot__logo" src="assets/img/logo-720.webp" alt="Just Soccer Futsal Center" width="720" height="672" loading="lazy">
+      <p><a class="foot__addr" href="https://maps.google.com/?q=210+Dupont+Street+Corona+CA+92879" rel="noopener">210 Dupont Street<br>Corona, CA 92879</a></p>
       <div class="foot__social">
         <a href="https://www.facebook.com/justsoccerfutsal" rel="noopener" aria-label="Just Soccer on Facebook"><svg aria-hidden="true"><use href="#i-fb"/></svg></a>
         <a href="https://www.instagram.com/justsoccerfutsal" rel="noopener" aria-label="Just Soccer on Instagram"><svg aria-hidden="true"><use href="#i-ig"/></svg></a>
@@ -530,6 +538,6 @@
   </div>
 </footer>
 
-<script src="assets/js/site.js?v=11"></script>
+<script src="assets/js/site.js?v=12"></script>
 </body>
 </html>

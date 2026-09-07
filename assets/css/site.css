@@ -899,24 +899,64 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
    FOOTER
    ========================================================================== */
 .foot{
+  position:relative;
   background:var(--royal-dp); color:rgba(var(--chalk-rgb),.74);
-  padding:clamp(3.5rem,9vh,6rem) var(--pad) 2rem;
+  /* top padding seats the touchline INSIDE the footer. Flush at 0 the circle
+     straddled the seam and its upper half became a dark disc floating on the
+     chalk section above - a bubble, not a device. */
+  padding:clamp(2.4rem,5.5vh,3.6rem) var(--pad) 2rem;
   font-size:.9rem;
+}
+/* Touchline sits INSIDE the footer, not on the seam above it: the seam is a
+   chalk section meeting a royal one, and a circle needs a single ground to sit
+   on. Its own variant so the ring reads on dark and the disc matches the
+   footer rather than the paper the other divider sits on. */
+.touchline--foot{
+  border-color:rgba(var(--chalk-rgb),.20); opacity:1;
+  margin-inline:calc(var(--pad) * -1);
+}
+.touchline--foot::after{
+  border-color:rgba(var(--chalk-rgb),.20);
+  background:var(--royal-dp);
+  width:clamp(3rem,6vw,4.6rem);
+}
+
+/* The closing line. The footer had no display type at all, which is most of
+   why it read as generic — every other section is Anton-led. This also fills
+   the width that the brand column was leaving empty. */
+.foot__sign{
+  font-family:var(--display); text-transform:uppercase;
+  font-size:clamp(1.9rem,1rem + 3.6vw,4rem);
+  line-height:.95; letter-spacing:.01em;
+  color:var(--paper);
+  margin:clamp(3rem,7vh,4.5rem) 0 clamp(2.5rem,6vh,3.75rem);
+  max-width:14ch;
 }
 .foot__wrap{
   max-width:var(--maxw); margin-inline:auto;
-  display:grid; gap:2.5rem; grid-template-columns:1.4fr 1fr 1fr;
+  display:grid; gap:2.5rem; grid-template-columns:1fr 1fr 1fr;
 }
 @media (max-width:760px){
   .foot__wrap{ grid-template-columns:1fr 1fr; }
   .foot__brand{ grid-column:1 / -1; }
 }
-.foot__logo{ width:6.5rem; margin-bottom:1.2rem; }
-.foot h4{
-  font-size:.7rem; font-weight:700; letter-spacing:.2em;
-  text-transform:uppercase; color:var(--paper); margin-bottom:1rem;
+.foot__logo{ width:clamp(7.5rem,15vw,10rem); margin-bottom:1.4rem; }
+.foot__addr{
+  border-bottom:1px solid transparent;
+  transition:border-color .3s var(--ease), color .3s var(--ease);
 }
-.foot ul{ display:grid; gap:.55rem; }
+.foot__addr:hover, .foot__addr:focus-visible{
+  color:var(--orange-lt); border-color:rgba(var(--orange-lt-rgb),.5);
+}
+
+/* The link columns step back so the closing line leads. Heads were solid white
+   at the same weight as everything else, which made three equal voices. */
+.foot h4{
+  font-size:.68rem; font-weight:700; letter-spacing:.22em;
+  text-transform:uppercase; color:rgba(var(--chalk-rgb),.55);
+  margin-bottom:1.1rem;
+}
+.foot ul{ display:grid; gap:.6rem; font-size:.86rem; }
 .foot a:hover{ color:var(--orange-lt); }
 .foot a:active{ opacity:.7; }
 .foot__social{ display:flex; gap:.9rem; margin-top:1.4rem; }

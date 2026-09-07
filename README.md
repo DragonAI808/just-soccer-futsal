@@ -200,8 +200,8 @@ it, then verifies the URL actually returns 200 before telling you it is live.
 `index.html` loads the stylesheet and script with a version marker:
 
 ```html
-<link rel="stylesheet" href="assets/css/site.css?v=11">
-<script src="assets/js/site.js?v=11"></script>
+<link rel="stylesheet" href="assets/css/site.css?v=12">
+<script src="assets/js/site.js?v=12"></script>
 ```
 
 **Increment both numbers whenever you edit `site.css` or `site.js`.** GitHub
