@@ -973,9 +973,6 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
   border-top:1px solid var(--line-lt);
   display:grid; gap:1rem; font-size:.76rem; color:rgba(var(--chalk-rgb),.52);
 }
-.credits{ max-width:78ch; line-height:1.6; }
-.credits a{ text-decoration:underline; text-underline-offset:2px; }
-.credits a:hover{ color:var(--orange-lt); }
 
 /* ==========================================================================
    REVEAL

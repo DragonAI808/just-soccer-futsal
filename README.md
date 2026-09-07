@@ -55,7 +55,7 @@ suite enforces parts of it.
 | **Latest** | Two Instagram reels as **click-to-load facades**, under the scoreboard. Meta is not contacted until someone plays one. Meant to be swapped — the posts are dated. |
 | Story | Coach Ernie and why the place exists — a **triptych**: photograph, text, photograph. Both pictures render at identical size and stretch to the height of the text. |
 | Visit | Address, phone, both email addresses, map link. |
-| Footer | Badge, nav, socials, credit. |
+| Footer | A closing line in Anton, badge, address linked to Maps, socials, nav columns, copyright. Touchline and halftone tie it to the rest of the page. |
 
 ### The multiplane camera
 
@@ -200,8 +200,8 @@ it, then verifies the URL actually returns 200 before telling you it is live.
 `index.html` loads the stylesheet and script with a version marker:
 
 ```html
-<link rel="stylesheet" href="assets/css/site.css?v=12">
-<script src="assets/js/site.js?v=12"></script>
+<link rel="stylesheet" href="assets/css/site.css?v=13">
+<script src="assets/js/site.js?v=13"></script>
 ```
 
 **Increment both numbers whenever you edit `site.css` or `site.js`.** GitHub
@@ -316,7 +316,7 @@ naming days, for the same reason. Fill those in once you have them.
 py -3 test/interactions.py
 ```
 
-Eighty-four assertions across desktop and phone: that the multiplane camera actually
+Eighty-five assertions across desktop and phone: that the multiplane camera actually
 scales, that the statement lights up, that the mobile menu opens and closes and
 restores body scroll, that nothing overflows sideways unclipped, that every
 in-page link resolves, that the real contact details are still on the page, and

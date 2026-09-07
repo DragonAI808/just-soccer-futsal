@@ -171,7 +171,12 @@ with sync_playwright() as p:
     low = body.lower()
     for banned in ["$", "enquir", "colour", "centre", "programme", "testimonial"]:
         check(f"no {banned!r} on the page", banned in low, False)
-    check("photo credit is present", "courtesy of just soccer" in low, True)
+    # The footer used to carry a photo credit, required while the images were
+    # CC-licensed stock. Every photograph is the client's own now, so crediting
+    # them on their own site read as odd and the line was removed. What still
+    # has to be there is the copyright notice.
+    check_true("copyright line is present", "just soccer futsal center," in low)
+    check("no self-credit for their own material", "courtesy of just soccer" in low, False)
     check("draft build is still noindex", 'content="noindex, nofollow"' in html, True)
 
     print("\n[6] DESIGN.md COMPLIANCE")
