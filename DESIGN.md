@@ -182,6 +182,21 @@ audience actually uses.
 
 ### The badge
 
+The header badge is **absolutely positioned**, so it does not drive the bar's
+height. In flow at 6.2rem it took the header from 66px to 112px - 12% of a
+laptop screen, permanently fixed. Out of flow the bar sits at ~61px and the
+badge overhangs it by 44px instead, the way a club crest usually sits on a
+sports header.
+
+It is anchored to the TOP of the bar, not centred: centring a 99px badge in a
+61px bar pushes a third of it above the viewport, where it is simply cut off.
+
+The overhang gets a royal tab () that fades in only when
+the bar is stuck. Without it, page text scrolls through the badge's transparent
+gaps - measured, it landed on the "Visit the court" heading. Over the hero the
+bar is transparent and the badge is meant to float on the photograph, so the
+tab stays hidden there.
+
 `assets/img/logo-source.png` is 1298×1212 **with a real alpha channel**, so the
 badge sits directly on any ground — no chip, no plate, no knockout. Its lettering
 is blue with a white outline, which is why it holds on both the royal grounds and
