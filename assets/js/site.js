@@ -119,6 +119,18 @@
   }
   onNavScroll();
 
+  // --navh feeds the mobile menu's top inset. It used to be a hand-written
+  // 3.35rem while the bar actually measured 66px, so the overlay started 12px
+  // too high and tucked under the header. Measuring it removes the guess — and
+  // the coupling, since the badge's size drives the bar's height.
+  function syncNavHeight() {
+    if (!nav) return;
+    document.documentElement.style.setProperty('--navh', nav.offsetHeight + 'px');
+  }
+  syncNavHeight();
+  window.addEventListener('resize', syncNavHeight, { passive: true });
+  window.addEventListener('load', syncNavHeight);
+
   function closeMenu() {
     burger.setAttribute('aria-expanded', 'false');
     burger.setAttribute('aria-label', 'Open menu');

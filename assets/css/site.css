@@ -234,9 +234,13 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
    taken the ball's own white panels with it. The replacement has a real alpha
    channel, so the badge sits straight on the blue. */
 .brand__mark{
-  width:3.1rem; height:auto; flex:none;
+  width:6.2rem; height:auto; flex:none;
   transition:transform .3s var(--ease);
 }
+/* A badge this size drives the bar's height, so the phone gets a slightly
+   smaller one — at 6.2rem the mark, the wordmark and the burger stop fitting
+   across a 390px screen. */
+@media (max-width:560px){ .brand__mark{ width:4.6rem; } }
 .brand:hover .brand__mark{ transform:rotate(-6deg) scale(1.05); }
 .brand__txt{
   font-family:var(--display); text-transform:uppercase;
