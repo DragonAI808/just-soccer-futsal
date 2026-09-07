@@ -483,6 +483,27 @@ with sync_playwright() as p:
         .map(a => a.getAttribute('href'))""")
     check("About's booking links go to Squarespace too", sorted(set(abook)),
           ["https://app.squarespacescheduling.com/schedule/9e3bd3ec"])
+
+    # The nav and footer are copy-pasted into every page rather than templated,
+    # so they can silently drift apart — the h4 -> h3 change touched both files
+    # and would have desynced them if only one had been edited. Compare the
+    # rendered typography of the shared chrome page against page, at one
+    # viewport, rather than trusting that the markup still matches.
+    CHROME = """() => {
+        const t = s => { const e = document.querySelector(s); if (!e) return s + ':MISSING';
+            const c = getComputedStyle(e);
+            return [c.fontSize, c.fontWeight, c.letterSpacing, c.lineHeight,
+                    c.fontFamily.split(',')[0], c.textTransform].join('|'); };
+        return { footLink: t('.foot ul a'), footHead: t('.foot h3'),
+                 footSign: t('.foot__sign'), footAddr: t('.foot__addr'),
+                 footBase: t('.foot__base p'), navLink: t('.nav__links a:not(.btn)'),
+                 navBtn: t('.nav__links .btn'), brand: t('.brand__txt') };
+    }"""
+    chrome_home = pg.evaluate(CHROME)
+    chrome_about = ab.evaluate(CHROME)
+    for part in chrome_home:
+        check(f"shared chrome matches across pages: {part}",
+              chrome_about[part], chrome_home[part])
     hm = b.new_page(viewport={"width": 1440, "height": 900})
     hm.goto(URL)
     hm.wait_for_load_state("networkidle")
