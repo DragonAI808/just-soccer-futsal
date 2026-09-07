@@ -421,6 +421,79 @@ with sync_playwright() as p:
     check_true("and it is a real PDF", pdf.body()[:5] == b"%PDF-")
     cw.close()
 
+    print("\n[13] THE ABOUT PAGE")
+
+    ab = b.new_page(viewport={"width": 1440, "height": 900})
+    ab.goto(URL + "/about.html")
+    ab.wait_for_load_state("networkidle")
+    ab.wait_for_timeout(1200)
+
+    # Their words, not a paraphrase of them. The home page already carries a
+    # compressed version of the mission in the statement band; the whole point
+    # of this page is that the original survives intact here. If someone
+    # rewrites these, the page stops being an About page and becomes a second
+    # home page.
+    mission = ab.locator(".mission__body").inner_text()
+    for phrase in ("positive and entertaining environment",
+                   "highest potential",
+                   "purest forms of the Sport",
+                   "health, respect and love for the community"):
+        check_true(f"mission keeps: {phrase[:34]}", phrase in mission)
+
+    founder = ab.locator("#founder").inner_text()
+    check_true("founder section names Hernan Garcia", "Hernan Garcia" in founder)
+    check_true("and Coach Ernie", "Coach Ernie" in founder)
+
+    facility = ab.locator("#facility").inner_text()
+    check_true("facility keeps the 5,000 sq ft line", "5,000 sq ft" in facility)
+
+    # This page has no photographic hero, so a transparent bar would put white
+    # nav text on the white mission band with nothing in the console.
+    check_true("nav is solid from the top",
+               ab.locator("#nav").evaluate(
+                   "e => getComputedStyle(e).backgroundColor !== 'rgba(0, 0, 0, 0)'"))
+    # inner_text() returns the CSS-transformed string, and the nav uppercases.
+    check("the current page is marked in the nav",
+          ab.locator('.nav__links a[aria-current="page"]').inner_text().lower(), "about")
+
+    # Heading levels must not skip. The footer heads used to be <h4>; on the
+    # home page h3s sat between them and the h2s, but this page has none, so
+    # h2 -> h4 skipped a level for anyone navigating by heading.
+    levels = ab.evaluate(
+        "() => [...document.querySelectorAll('h1,h2,h3,h4,h5,h6')].map(h => +h.tagName[1])")
+    skips = [(a, c) for a, c in zip(levels, levels[1:]) if c > a + 1]
+    check("no skipped heading levels on About", skips, [])
+    check("exactly one h1", levels.count(1), 1)
+
+    # Both pages have to reach each other, or the nav is decorative.
+    check_true("About links home", ab.locator('a[href="index.html"]').count() > 0)
+    hm = b.new_page(viewport={"width": 1440, "height": 900})
+    hm.goto(URL)
+    hm.wait_for_load_state("networkidle")
+    settled(hm)
+    check_true("home links About from the nav",
+               hm.locator('.nav__links a[href="about.html"]').count() == 1)
+    check_true("home links About from the footer",
+               hm.locator('.foot a[href="about.html"]').count() == 1)
+    hlv = hm.evaluate(
+        "() => [...document.querySelectorAll('h1,h2,h3,h4,h5,h6')].map(h => +h.tagName[1])")
+    check("no skipped heading levels on home",
+          [(a, c) for a, c in zip(hlv, hlv[1:]) if c > a + 1], [])
+    hm.close()
+
+    over = []
+    for w in (320, 375, 768, 1024, 1920):
+        nb = b.new_page(viewport={"width": w, "height": 900})
+        nb.goto(URL + "/about.html")
+        nb.wait_for_load_state("networkidle")
+        nb.wait_for_timeout(700)
+        if nb.evaluate("document.documentElement.scrollWidth"
+                       " - document.documentElement.clientWidth"):
+            over.append(w)
+        nb.close()
+    check("About does not overflow sideways at any width", over, [])
+    ab.close()
+
     b.close()
 
 print(f"\n{sum(results)}/{len(results)} passed")

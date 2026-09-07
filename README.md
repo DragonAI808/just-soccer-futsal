@@ -1,6 +1,6 @@
 # Just Soccer Futsal Center — website
 
-A single-page, dependency-free site for the futsal center at 210 Dupont Street,
+A two-page, dependency-free site for the futsal center at 210 Dupont Street,
 Corona, California. Plain HTML, CSS and JavaScript: no build step, no framework,
 no `npm install`. Open it, edit it, ship it.
 
@@ -18,10 +18,12 @@ is already there for when clips get added.)
 ## Files
 
 ```
-index.html                  all the markup and copy
+index.html                  the home page - all its markup and copy
+about.html                  the About page - mission, founder, facility
 DESIGN.md                   the design spec — read this before restyling anything
 assets/css/site.css         design tokens + every style
 assets/js/site.js           preloader, reveal, nav, statement, camera, zoom, parallax
+                            (shared by both pages - about.html loads the same file)
 assets/img/logo-source.png  the club badge, 1298x1212 with alpha (master)
 assets/img/logo-{720,260}.webp  derived sizes actually used by the page
 assets/img/favicon-180.png  tab icon (the ball, cropped from the master)
@@ -56,7 +58,42 @@ suite enforces parts of it.
 | **Latest** | Two Instagram reels as **click-to-load facades**, under the scoreboard. Meta is not contacted until someone plays one. Meant to be swapped — the posts are dated. |
 | Story | Coach Ernie and why the place exists — a **triptych**: photograph, text, photograph. Both pictures render at identical size and stretch to the height of the text. |
 | Visit | Address, phone, both email addresses, map link. |
-| Footer | A closing line in Anton, badge, address linked to Maps, socials, nav columns, copyright. Touchline and halftone tie it to the rest of the page. |
+| Footer | A closing line in Anton, badge, address linked to Maps, socials, nav columns, the waiver PDF, copyright. |
+
+### about.html
+
+| Section | Notes |
+|---|---|
+| Page head | Their own sign-off, "Live your passion! Play the game!", as the h1. Solid nav — see below. |
+| Mission | **Their words, verbatim.** See the warning under it. |
+| Founder | Coach Ernie, beside `story-1`. |
+| Facility | The arena band reused from the home page, left-aligned because it holds body copy here rather than four stats. |
+
+The copy came from `justsoccerfutsal.org/about`. The home page already carries a
+**compressed** version of the mission in its statement band ("A positive,
+entertaining place where players reach their highest potential") and of the
+founder story in the triptych ("Built to give the game a stage" is lifted from
+"provide the stage"). That split is deliberate: **home teases, About tells.** If
+someone rewrites the About copy into a paraphrase, the page stops earning its
+place. The suite asserts four phrases from the mission survive intact.
+
+Only four edits were made to their text, all mechanical, none to meaning:
+`devoted to provide` → `devoted to providing`; `player's development` →
+`players' development`; a stray comma removed from `our non-stop action, will
+push`; and `Sports Facility` lowercased mid-sentence. **Their capitalisation of
+"the Sport", "the Game" and "Essence of the Game" is left exactly as written** —
+that is house style, not an error.
+
+One thing worth deciding: the About copy says **"Just Soccer FC"** throughout,
+the site says **"Just Soccer Futsal Center"**, and the waiver says **"Just Soccer
+FC LLC"**. Three names for one business. Left as-is because it is quoted text,
+but it is the sort of thing a visitor notices.
+
+`#nav.is-solid` exists for this page: the home bar is transparent until you
+scroll past 72% of the hero, which works because it sits on a photograph for
+that whole distance. About has no photographic hero, so a transparent bar would
+put white nav text on the white mission band — invisible, with nothing in the
+console. Any future page without a full-height photo hero needs that class.
 
 ### The multiplane camera
 

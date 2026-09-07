@@ -916,6 +916,99 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
 .visit__map:hover{ background:rgba(var(--paper-rgb),.1); border-color:var(--orange); }
 
 /* ==========================================================================
+   ABOUT PAGE
+   Built almost entirely from components that already exist — the arena band,
+   the touchline, .h2/.lede/.eyebrow/.btn are all reused verbatim, so the two
+   pages read as one site rather than two builds. Only what genuinely has no
+   equivalent on the home page is defined here.
+   ========================================================================== */
+
+/* The home page's bar is transparent until you scroll past 72% of the hero,
+   because for that whole distance it sits on a dark photograph. This page has
+   no full-height hero: the header band ends after ~60svh, so between there and
+   the scroll threshold a transparent bar would put white nav text on the white
+   mission section — invisible, with nothing in the console. Pages without a
+   photographic hero carry .is-solid and skip the transparent state entirely. */
+#nav.is-solid{
+  background:rgba(var(--royal-rgb),.97);
+  backdrop-filter:blur(10px);
+  box-shadow:0 3px 0 rgba(var(--orange-rgb),.95);
+}
+/* the current page keeps its underline lit rather than waiting for a hover */
+.nav__links a[aria-current="page"]::after{ transform:scaleX(1); transform-origin:left; }
+
+.phead{
+  position:relative;
+  background:var(--royal-dp); color:var(--paper);
+  /* --navh is measured by site.js, so this clears the real bar rather than a
+     guess that goes stale the next time the badge is resized */
+  padding:calc(var(--navh) + clamp(3.5rem,10vh,7rem)) var(--pad) clamp(3.5rem,9vh,6.5rem);
+}
+.phead__title{
+  font-family:var(--display); font-weight:400;
+  /* the same curve as the home page's h1: a floor, a viewport term that keeps
+     scaling on a large monitor, and a ceiling so it cannot swallow a 4K screen */
+  font-size:clamp(2.4rem,.5rem + 6.5vw,9rem);
+  line-height:.9; letter-spacing:.005em; text-transform:uppercase;
+  margin:0 0 clamp(1.2rem,3vh,2rem);
+  max-width:18ch;
+}
+.phead__lede{ max-width:46ch; }
+
+/* The mission statement. Set at lede-and-a-half on a white ground with nothing
+   else in the band: it is the only thing on the page that is quoted rather than
+   written, and it should look quoted. */
+.mission{ background:var(--paper); padding:clamp(4rem,11vh,8rem) var(--pad); }
+/* Left-aligned on the page margin, not centred. Every other band on this site
+   starts at var(--pad); a centred measure here made the mission jump inward
+   from the header above it and read as a different template. The max-width
+   still holds the line length. */
+.mission__wrap{ max-width:var(--maxw); margin-inline:auto; }
+.mission__body{ max-width:60ch; }
+.mission__body{
+  margin:1.6rem 0 0; padding:0 0 0 clamp(1.2rem,3vw,2.4rem);
+  border-left:4px solid var(--orange);
+}
+.mission__body p{
+  font-size:clamp(1.25rem,1.02rem + 1.05vw,2.05rem);
+  line-height:1.34; color:var(--ink); text-wrap:pretty;
+}
+
+.about-split{
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:clamp(2rem,5vw,4.5rem); align-items:center;
+  max-width:var(--maxw); margin-inline:auto;
+  padding:clamp(4rem,11vh,8rem) var(--pad);
+}
+.about-split__figure{ margin:0; overflow:hidden; aspect-ratio:4 / 5; }
+.about-split__figure img{ width:100%; height:100%; object-fit:cover; object-position:50% 45%; }
+.about-split__body{ max-width:52ch; }
+.about-split__body .h2{ margin-bottom:1.3rem; }
+.about-split__p{ margin-top:1.1rem; color:var(--ink-soft); }
+@media (max-width:880px){
+  .about-split{ grid-template-columns:1fr; gap:2.5rem; }
+  .about-split__figure{ aspect-ratio:4 / 3; }
+}
+
+/* The arena band centres its text, which is right for the home page's headline
+   plus four short stats. Here it holds two paragraphs of body copy, and eight
+   centred lines rag on both edges with no left margin for the eye to return to
+   — measurably slower to read and it looks like a caption. Same band, same
+   photograph, left-aligned copy. */
+#facility{ text-align:left; }
+/* The inner box is sized for the HEADLINE, the paragraphs are narrowed
+   separately. Holding both to one measure forced "Street-style" to break at
+   its own hyphen, which reads as a typo rather than a line break. */
+#facility .arena__inner{ max-width:min(62rem, 100%); justify-self:start; }
+#facility .eyebrow{ justify-content:flex-start; }
+.facility__p{ max-width:56ch; }
+/* NOT :first-of-type - the eyebrow is a <p> too, so that selector matched the
+   eyebrow and left the copy jammed under the headline. Target the adjacency. */
+.h2 + .facility__p{ margin-top:clamp(1.4rem,3vh,2rem); }
+.facility__p + .facility__p{ margin-top:1.1rem; }
+.facility__cta{ display:flex; flex-wrap:wrap; gap:1rem; margin-top:clamp(1.8rem,4vh,2.6rem); }
+
+/* ==========================================================================
    FOOTER
    ========================================================================== */
 .foot{
@@ -957,7 +1050,7 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
 
 /* The link columns step back so the closing line leads. Heads were solid white
    at the same weight as everything else, which made three equal voices. */
-.foot h4{
+.foot h3{
   font-size:.68rem; font-weight:700; letter-spacing:.22em;
   text-transform:uppercase; color:rgba(var(--chalk-rgb),.62);
   margin-bottom:1.1rem;
