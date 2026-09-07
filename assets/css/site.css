@@ -391,11 +391,19 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
   max-width:var(--maxw); width:100%; margin-inline:auto;
   color:var(--paper);
 }
-/* Reduced from the original 9.5rem cap — at that size it filled the frame and
-   crowded the photograph it was supposed to sit on. */
+/* The ceiling here is the load-bearing number, not the slope.
+   At clamp(…, 1rem + 6.2vw, 5.6rem) the headline stopped growing at a 1216px
+   viewport and sat at 89.6px on every screen above it — 7.0% of a 1280 laptop
+   but only 4.67% of a 1920 monitor, from identical CSS. It read correctly on
+   the laptop and shrank into the frame on anything larger.
+
+   Lower base + steeper slope + a much higher cap: the laptop lands where it
+   already was (91px at 1280) and larger displays keep scaling (133px at 1920).
+   Simply raising the old cap would have pushed the laptop to 95px, which is
+   bigger than the size that was signed off. */
 .hero__title{
   font-family:var(--display); font-weight:400; text-transform:uppercase;
-  font-size:clamp(2.4rem,1rem + 6.2vw,5.6rem);
+  font-size:clamp(2.4rem,.5rem + 6.5vw,9rem);
   line-height:.9; letter-spacing:.006em;
   max-width:16ch;
 }

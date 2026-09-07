@@ -126,7 +126,7 @@ the entire sports signal, carried by one font. Barlow is its natural companion.
 
 | Level | Family | Size | Weight | LH | Tracking |
 |---|---|---|---|---|---|
-| Hero H1 | display | `clamp(2.4rem, 1rem + 6.2vw, 5.6rem)` | 400 | .90 | .006em |
+| Hero H1 | display | `clamp(2.4rem, .5rem + 6.5vw, 9rem)` | 400 | .90 | .006em |
 | H2 | display | `clamp(2.2rem, 1.1rem + 4.1vw, 4.4rem)` | 400 | .94 | .005em |
 | H3 | display | `clamp(1.35rem, 1.1rem + .9vw, 1.9rem)` | 400 | 1.02 | .01em |
 | Statement | display | `clamp(1.7rem, .9rem + 3.3vw, 3.4rem)` | 400 | 1.08 | — |

@@ -123,8 +123,8 @@ Three things that are load-bearing and not obvious:
 `index.html` loads the stylesheet and script with a version marker:
 
 ```html
-<link rel="stylesheet" href="assets/css/site.css?v=4">
-<script src="assets/js/site.js?v=4"></script>
+<link rel="stylesheet" href="assets/css/site.css?v=5">
+<script src="assets/js/site.js?v=5"></script>
 ```
 
 **Increment both numbers whenever you edit `site.css` or `site.js`.** GitHub
