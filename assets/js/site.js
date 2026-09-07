@@ -145,6 +145,20 @@
   window.addEventListener('resize', syncNavHeight, { passive: true });
   window.addEventListener('load', syncNavHeight);
 
+  // Rotating a phone to landscape, or resizing past the 900px breakpoint, used
+  // to strand the visitor: the menu kept .is-open and body.overflow stayed
+  // 'hidden', but the burger that closes it is display:none above 900px. The
+  // page could not be scrolled and nothing on screen would release it — only a
+  // reload. The breakpoint is read off the burger's own computed display rather
+  // than hard-coded, so it cannot drift away from the CSS.
+  var wideNav = window.matchMedia('(min-width:901px)');
+  function closeOnWiden() {
+    if (wideNav.matches && burger && burger.getAttribute('aria-expanded') === 'true') closeMenu();
+  }
+  if (wideNav.addEventListener) wideNav.addEventListener('change', closeOnWiden);
+  else wideNav.addListener(closeOnWiden);              // Safari < 14
+  window.addEventListener('resize', closeOnWiden, { passive: true });
+
   function closeMenu() {
     burger.setAttribute('aria-expanded', 'false');
     burger.setAttribute('aria-label', 'Open menu');

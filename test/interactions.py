@@ -340,6 +340,66 @@ with sync_playwright() as p:
         check(f"no document overflow at {narrow}px", over, 0)
         nb.close()
 
+    print("\n[10] THE MENU MUST NOT STRAND ANYONE")
+
+    # Open the menu on a phone, then rotate to landscape (or resize past the
+    # 900px breakpoint). The burger becomes display:none, so if the menu keeps
+    # its open state the body stays overflow:hidden with no control on screen
+    # that can release it — the page cannot be scrolled and only a reload gets
+    # you out. A scripted window.scrollTo does NOT reproduce this (it ignores
+    # the lock), which is why this drives a real wheel gesture.
+    rt = b.new_page(viewport={"width": 390, "height": 844})
+    rt.goto(URL)
+    rt.wait_for_load_state("networkidle")
+    settled(rt)
+    rt.click("#burger")
+    rt.wait_for_timeout(300)
+    check_true("menu opens on the phone",
+               rt.evaluate("document.getElementById('navLinks').classList.contains('is-open')"))
+    rt.set_viewport_size({"width": 1280, "height": 800})
+    rt.wait_for_timeout(600)
+    check("widening closes the menu",
+          rt.evaluate("document.getElementById('navLinks').classList.contains('is-open')"), False)
+    check("widening releases the scroll lock", rt.evaluate("document.body.style.overflow"), "")
+    rt.mouse.move(640, 400)
+    rt.mouse.wheel(0, 900)
+    rt.wait_for_timeout(500)
+    check_true("the page still scrolls afterwards", rt.evaluate("window.scrollY") > 100)
+    rt.close()
+
+    print("\n[11] CONTRAST + TAP TARGETS")
+
+    cw = b.new_page(viewport={"width": 1440, "height": 900})
+    cw.goto(URL)
+    cw.wait_for_load_state("networkidle")
+    settled(cw)
+
+    # Every .btn on the page must be ink-on-orange. `.nav__links a` is (0,1,1)
+    # and outranks `.btn` (0,1,0), so the header CTA silently rendered white on
+    # #EF6C00 — 3.08:1, the exact pairing DESIGN.md rejects, on the one button
+    # visible for the whole visit. Assert all of them, not just the nav one.
+    btn_colors = cw.evaluate(
+        "() => [...document.querySelectorAll('.btn:not(.btn--ghost)')]"
+        ".map(e => getComputedStyle(e).color)")
+    check("every solid button uses ink on orange",
+          sorted(set(btn_colors)), ["rgb(6, 22, 52)"])
+
+    # WCAG 2.2 SC 2.5.8: interactive targets are at least 24x24 CSS px.
+    small = cw.evaluate("""() => {
+        const bad = [];
+        document.querySelectorAll('a, button').forEach(el => {
+            const r = el.getBoundingClientRect();
+            if (!r.width || !r.height) return;
+            if (getComputedStyle(el).visibility === 'hidden') return;
+            if (r.height < 24 || r.width < 24) bad.push(
+                (el.textContent.trim() || el.getAttribute('aria-label') || el.tagName).slice(0, 30)
+                + ' ' + Math.round(r.width) + 'x' + Math.round(r.height));
+        });
+        return bad;
+    }""")
+    check("no interactive target under 24px", small, [])
+    cw.close()
+
     b.close()
 
 print(f"\n{sum(results)}/{len(results)} passed")

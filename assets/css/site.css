@@ -294,7 +294,15 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
 .nav__links a:not(.btn):hover::after,
 .nav__links a:not(.btn):focus-visible::after{ transform:scaleX(1); transform-origin:left; }
 .nav__links a:active{ opacity:.7; }
-.nav__links .btn{ padding:.62rem 1.15rem; font-size:.7rem; border-width:2px; }
+/* color is restated here because `.nav__links a` (0,1,1) outweighs `.btn`
+   (0,1,0) and was repainting the header CTA white -- white on #EF6C00 is
+   3.08:1, the exact combination the palette rejects, on the one button that
+   is on screen the entire visit. Ink on orange is 5.51:1. */
+.nav__links .btn{
+  padding:.62rem 1.15rem; font-size:.7rem; border-width:2px;
+  color:var(--ink);
+}
+.nav__links .btn:hover, .nav__links .btn:focus-visible{ color:var(--paper); }
 
 .burger{ display:none; width:2.75rem; height:2.75rem; position:relative; }
 .burger span{
@@ -625,6 +633,7 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
 }
 .latest__head .eyebrow{ margin-bottom:0; }
 .latest__all{
+  display:inline-block; padding:.3rem 0;   /* 21px tall was under the 24px target minimum */
   font-size:.74rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
   color:var(--orange-ink);
   border-bottom:2px solid transparent;
@@ -884,6 +893,10 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
    a fixed 7.5rem label column it needed 372px, which overflowed the document on
    anything under ~400px wide — an iPhone SE got a horizontal scrollbar. */
 .visit__row dd{ margin:0; font-size:1.02rem; overflow-wrap:anywhere; }
+/* same reason as the footer list: a 19px tall inline link is under the 24px
+   target minimum, and these are the phone number and the two addresses -- the
+   links most likely to be tapped on a phone. */
+.visit__row dd a{ display:inline-block; padding:.3rem 0; }
 @media (max-width:560px){
   .visit__row{ grid-template-columns:1fr; gap:.15rem; }
   .visit__row dt{ font-size:.66rem; }
@@ -946,10 +959,15 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
    at the same weight as everything else, which made three equal voices. */
 .foot h4{
   font-size:.68rem; font-weight:700; letter-spacing:.22em;
-  text-transform:uppercase; color:rgba(var(--chalk-rgb),.55);
+  text-transform:uppercase; color:rgba(var(--chalk-rgb),.62);
   margin-bottom:1.1rem;
 }
-.foot ul{ display:grid; gap:.6rem; font-size:.86rem; }
+/* WCAG 2.2 target size wants 24px minimum; these links were 17px tall boxes
+   stacked 10px apart, which on a phone is a thumb landing between two of them.
+   Padding the anchor rather than spacing the <li> grows the hit area without
+   moving anything visually. */
+.foot ul{ display:grid; gap:.15rem; font-size:.86rem; }
+.foot ul a{ display:inline-block; padding:.42rem 0; }
 .foot a:hover{ color:var(--orange-lt); }
 .foot a:active{ opacity:.7; }
 .foot__social{ display:flex; gap:.9rem; margin-top:1.4rem; }
@@ -964,7 +982,9 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
 .foot__base{
   max-width:var(--maxw); margin:3rem auto 0; padding-top:1.5rem;
   border-top:1px solid var(--line-lt);
-  display:grid; gap:1rem; font-size:.76rem; color:rgba(var(--chalk-rgb),.52);
+  /* .52 alpha on royal-dp measured 4.17:1 at 12px, under AA. .70 clears it
+     while still reading as the quietest line on the page. */
+  display:grid; gap:1rem; font-size:.76rem; color:rgba(var(--chalk-rgb),.70);
 }
 
 /* ==========================================================================
