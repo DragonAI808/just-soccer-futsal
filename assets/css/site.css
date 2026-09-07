@@ -666,18 +666,35 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
 /* ==========================================================================
    SPLIT — photograph + copy, image drifting on a parallax
    ========================================================================== */
-/* The photograph here is landscape (1291x998), not the portrait crop this
-   section used to carry, so the image column takes the larger share — an even
-   split left a short, stranded picture beside a tall stack of text. */
+/* Triptych: photograph, text, photograph. The two source shots are different
+   shapes (654x715 and 451x744), so neither is cropped in the file — both sit in
+   an identical 3:4 box and object-fit does the cropping. That is what makes them
+   read as a matched pair, and it survives someone swapping either photograph for
+   another of any shape. */
 .split{
-  display:grid; gap:clamp(2rem,5vw,4rem);
-  grid-template-columns:1.22fr 1fr; align-items:center;
+  display:grid; gap:clamp(1.5rem,3.2vw,3rem);
+  grid-template-columns:1fr 1.5fr 1fr;
+  align-items:center;
   padding:clamp(4rem,11vh,8rem) var(--pad);
   max-width:var(--maxw); margin-inline:auto;
 }
-.split__figure{ overflow:hidden; position:relative; }
-.split__figure img{ width:100%; }
-.split__body{ max-width:46ch; }
+.split__figure{
+  overflow:hidden; position:relative;
+  aspect-ratio:3 / 4;          /* base height when a figure sits on its own row */
+  align-self:stretch;
+}
+.split__figure img{
+  width:100%; height:100%;
+  object-fit:cover; object-position:50% 45%;
+}
+/* On the three-column layout the text is the tall element — 838px against the
+   544px a 3:4 box gives, which left ~294px of dead space under each picture.
+   Dropping the ratio lets both figures stretch to the row height, so they match
+   the text and each other exactly, at any copy length. */
+@media (min-width:881px){
+  .split__figure{ aspect-ratio:auto; min-height:26rem; }
+}
+.split__body{ max-width:46ch; margin-inline:auto; }
 .split__body p + p{ margin-top:1.1rem; }
 .split__body .h2 + .lede{ margin-top:1.3rem; }
 .split__list{ margin-top:1.8rem; display:grid; gap:.85rem; }
@@ -693,7 +710,21 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
 .split__badge{
   width:clamp(10rem,22vw,17rem); margin-bottom:2rem;
 }
-@media (max-width:880px){ .split{ grid-template-columns:1fr; } }
+/* Narrow: the two photographs sit side by side ABOVE the text rather than
+   sandwiching it. Stacked, image-text-image put the second picture below the
+   list where it read as an orphan. */
+@media (max-width:880px){
+  .split{ grid-template-columns:1fr 1fr; }
+  /* align-self:stretch would resolve the HEIGHT first and then derive width
+     from the ratio, leaving each picture narrower than its own column. Here the
+     width should fill and the height follow. */
+  .split__figure{ align-self:start; }
+  .split__body{ grid-column:1 / -1; order:1; max-width:52ch; margin-inline:0; }
+}
+@media (max-width:520px){
+  .split{ grid-template-columns:1fr; }
+  .split__figure:last-of-type{ display:none; }   /* one is enough on a phone */
+}
 
 /* ==========================================================================
    VISIT

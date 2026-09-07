@@ -217,10 +217,28 @@ Outlined via `-webkit-text-stroke: 2px var(--orange)`, filling solid on row hove
 the way a squad number is printed on a shirt back. `@supports not` fallback fills
 them solid where text-stroke is unsupported.
 
+### The story triptych (`.split`)
+
+Photograph, text, photograph — `1fr 1.5fr 1fr`. The two source shots are
+different shapes (654×715 and 451×744) and **neither is cropped in the file**:
+both sit in a shared box and `object-fit: cover` does the cropping, so they read
+as a matched pair and stay matched if either is swapped for a photo of any shape.
+
+The sizing rule is the fiddly part, and it differs by breakpoint on purpose:
+
+| Width | Figure sizing | Why |
+|---|---|---|
+| ≥881px | `aspect-ratio: auto` + `align-self: stretch` | The text column is the tall one (838px vs the 544px a 3:4 box gives). Stretching makes both pictures exactly the text's height, at any copy length. |
+| ≤880px | `aspect-ratio: 3/4` + `align-self: start` | Pictures share a row above the text. Stretch here would resolve *height* first and derive a width from the ratio, leaving each picture narrower than its own column. |
+| ≤520px | second figure `display: none` | One is enough on a phone. |
+
+That interaction — `aspect-ratio` plus `align-self: stretch` means height wins
+and width is derived — is the thing to remember if this layout is ever reworked.
+
 ### Cards
 
-All **square-cornered**. No border radius anywhere except the badge chip and the
-court circles. Court markings are straight lines; the geometry follows them.
+All **square-cornered**. No border radius anywhere except the court circles and
+the badge's own artwork. Court markings are straight lines; the geometry follows.
 
 ---
 

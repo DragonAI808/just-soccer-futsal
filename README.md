@@ -51,7 +51,7 @@ suite enforces parts of it.
 | Futsal | Four cells explaining what futsal actually is, as distinct from indoor soccer. |
 | Programs | The six things that run, numbered in outlined **jersey numerals**. |
 | Arena | Full-bleed band of the hall whose photograph **zooms out as it arrives** — the opposite move to the hero, so the trick does not read as the same effect twice. |
-| Story | Coach Ernie and why the place exists, with the badge and a parallax image. |
+| Story | Coach Ernie and why the place exists — a **triptych**: photograph, text, photograph. Both pictures render at identical size and stretch to the height of the text. |
 | Visit | Address, phone, both email addresses, map link. |
 | Footer | Badge, nav, socials, credit. |
 
