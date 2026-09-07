@@ -29,6 +29,7 @@ assets/img/og-1200x630.jpg  social share card
 assets/video/               empty; drop clips here when there are any
 serve.js                    local preview server
 tools/add-clip.sh           ffmpeg pipeline for making a raw clip web-ready
+tools/site.ps1              take the live site off/on (see below)
 test/interactions.py        Playwright suite — run it after any change
 ```
 
@@ -117,6 +118,47 @@ Three things that are load-bearing and not obvious:
   image's real parent is `<picture>`, and `picture{display:contents}` generates no
   box, so its rect is all zeros. That silently pinned it at `scale(1)` once
   already. If a zoom ever stops working, look there first.
+
+## Taking the live site off and on
+
+`tools/site.ps1` is the switch. Run it from PowerShell in the project root:
+
+```powershell
+.\tools\site.ps1 status
+.\tools\site.ps1 off
+.\tools\site.ps1 on
+```
+
+| Command | Effect |
+|---|---|
+| `status` | Prints repo visibility, Pages state, and the live HTTP code |
+| `off` | Disables Pages. Repo stays public and browsable; only the site goes |
+| `on` | Re-enables Pages from `main`, waits for the build, confirms it is up |
+| `hide` | `off` **and** makes the repo private, so the source is hidden too |
+| `show` | Public again, then back online |
+
+The URL never changes — it is derived from owner and repo name — and nothing
+here touches your commits. Tested end to end: off, verified, on, verified.
+
+### One caveat worth knowing before you rely on `off`
+
+**It is not instant.** GitHub Pages sits behind Fastly, and the HTML is cached
+at the edge with `max-age=600`. After `off`:
+
+- The origin stops serving **immediately** — CSS, JS and images 404 at once
+- Anyone whose edge node already has the HTML cached can still get the page for
+  up to ~10 minutes, but it will be **unstyled**, because the stylesheet is
+  already gone
+- New visitors, and anyone on an edge without a cached copy, get a 404 straight
+  away
+
+So `off` is reliable for "stop showing people this," but there is a window where
+a visitor mid-session sees a broken-looking page rather than a clean 404. If you
+need a clean handover, `off` and then wait ten minutes before assuming it is
+fully down. Nothing on our side can shorten that; it is Fastly's TTL.
+
+`on` has no such issue: the build takes 30-60 seconds and the script waits for
+it, then verifies the URL actually returns 200 before telling you it is live.
 
 ## Cache busting — bump this when you change CSS or JS
 
