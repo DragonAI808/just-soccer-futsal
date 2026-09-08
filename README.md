@@ -113,6 +113,12 @@ that whole distance. About has no photographic hero, so a transparent bar would
 put white nav text on the white mission band — invisible, with nothing in the
 console. Any future page without a full-height photo hero needs that class.
 
+It is defined **beside `#nav.is-stuck`**, not in the About section, and the
+order of the three nav-state rules matters. `.is-stuck`, `.is-solid` and
+`.is-menu-open` are all `(1,1,0)`, so source order decides — and
+`.is-menu-open` must come last, because it is the one that removes the
+`backdrop-filter`. See the comment on it: that removal is load-bearing.
+
 ### The multiplane camera
 
 The hero sits in a **250svh rail** with a `position: sticky` pane inside it, and

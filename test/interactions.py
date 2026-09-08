@@ -357,6 +357,57 @@ with sync_playwright() as p:
         check(f"no document overflow at {narrow}px", over, 0)
         nb.close()
 
+    print("\n[9b] THE MENU PANEL MUST BE OPAQUE, SCROLLED OR NOT")
+
+    # Two separate bugs lived here, both invisible at the top of the page.
+    #
+    # 1. backdrop-filter on #nav makes #nav the containing block for its
+    #    position:fixed descendants — and the panel is one. Once the bar went
+    #    .is-stuck the panel sized against an 85px bar instead of the viewport,
+    #    its height resolved to ZERO, and the links spilled down the page as
+    #    bare text over the content behind them.
+    # 2. --navh is measured once at load, when the bar is 85px. It shrinks to
+    #    57px on sticking, so a panel starting at var(--navh) began 28px too low
+    #    and a strip of the page showed above the links.
+    #
+    # Both only appear AFTER scrolling, which is why this checks both states on
+    # both pages. About is the one that carries .is-solid, so its bar has the
+    # blur from the first paint.
+    for path, label in (("", "home"), ("/about.html", "About")):
+        mp = b.new_page(viewport={"width": 390, "height": 844})
+        mp.goto(URL + path)
+        mp.wait_for_load_state("networkidle")
+        settled(mp)
+        for state, y in (("at rest", 0), ("scrolled", 3000)):
+            mp.evaluate("y => window.scrollTo({top:y, behavior:'instant'})", y)
+            mp.wait_for_timeout(600)
+            mp.click("#burger")
+            mp.wait_for_timeout(700)
+            m = mp.evaluate("""() => {
+                const p = document.getElementById('navLinks');
+                const r = p.getBoundingClientRect();
+                const bg = document.getElementById('burger').getBoundingClientRect();
+                const hit = document.elementFromPoint(bg.left + bg.width / 2,
+                                                      bg.top + bg.height / 2);
+                return { w: Math.round(r.width), h: Math.round(r.height),
+                         vw: window.innerWidth, vh: window.innerHeight,
+                         bg: getComputedStyle(p).backgroundColor,
+                         // #nav must not become the containing block
+                         containedBy: p.offsetParent ? p.offsetParent.id : 'viewport',
+                         burgerOnTop: !!(hit && hit.closest('#burger')) };
+            }""")
+            check(f"{label} {state}: panel fills the viewport",
+                  [m["w"] >= m["vw"] - 1, m["h"] >= m["vh"] - 1], [True, True])
+            check(f"{label} {state}: panel is opaque royal",
+                  m["bg"], "rgb(1, 42, 120)")
+            check(f"{label} {state}: the nav is not its containing block",
+                  m["containedBy"], "viewport")
+            check_true(f"{label} {state}: the close button stays clickable",
+                       m["burgerOnTop"])
+            mp.click("#burger")
+            mp.wait_for_timeout(400)
+        mp.close()
+
     print("\n[10] THE MENU MUST NOT STRAND ANYONE")
 
     # Open the menu on a phone, then rotate to landscape (or resize past the

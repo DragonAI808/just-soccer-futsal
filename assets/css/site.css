@@ -236,7 +236,37 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
   box-shadow:0 3px 0 rgba(var(--orange-rgb),.95);   /* an orange touchline under the bar */
   padding-top:.4rem; padding-bottom:.4rem;
 }
-#nav.is-menu-open{ background:var(--royal-dp); }
+/* Pages with no photographic hero carry .is-solid and skip the transparent
+   state entirely. The home bar is transparent until you scroll past 72% of the
+   hero, which works because it sits on a dark photograph for that whole
+   distance. About's header band ends after ~60svh, so between there and the
+   scroll threshold a transparent bar would put white nav text on the white
+   mission section — invisible, with nothing in the console.
+
+   It lives HERE, beside .is-stuck, rather than down in the About section where
+   it started. Both are (1,1,0), so the cascade is decided by source order, and
+   from the About section it came AFTER .is-menu-open and quietly reinstated the
+   backdrop-filter that the rule below exists to remove. Keep all three nav
+   states together, in this order. */
+#nav.is-solid{
+  background:rgba(var(--royal-rgb),.97);
+  backdrop-filter:blur(10px);
+  box-shadow:0 3px 0 rgba(var(--orange-rgb),.95);
+}
+
+/* backdrop-filter:none is load-bearing, not tidying.
+   The mobile menu panel is position:fixed and lives INSIDE #nav. A
+   backdrop-filter on an ancestor makes that ancestor the containing block for
+   its fixed descendants — so once the bar went .is-stuck, the panel stopped
+   sizing against the viewport and started sizing against the 85px nav bar.
+   Its `inset:var(--navh) 0 0 0` then resolved to a height of ZERO: the royal
+   background painted nothing and the links spilled down the page as bare text
+   over the content behind them. At the top of the page there is no blur, which
+   is why the menu only broke after you had scrolled.
+   The bar is solid --royal-dp while the menu is open, so the blur has nothing
+   to do anyway. (filter, transform, perspective and will-change do the same
+   thing — don't add one to #nav either.) */
+#nav.is-menu-open{ background:var(--royal-dp); backdrop-filter:none; }
 
 /* the nav is fixed, so an in-page jump would otherwise land the heading under it */
 #game, #programs, #arena, #tonight, #visit{ scroll-margin-top:4.5rem; }
@@ -317,13 +347,25 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
 
 @media (max-width:900px){
   .burger{ display:block; }
+  /* inset:0, NOT inset:var(--navh). The panel used to start exactly where the
+     bar ended, which relied on --navh still being accurate. It is measured once
+     at load, when the bar is 85px — but the bar shrinks to 57px the moment it
+     sticks (tighter padding, smaller badge), so the panel began 28px too low
+     and a strip of the page showed through above the links.
+     Covering the whole viewport makes a stale --navh harmless: it becomes a bit
+     of extra blue above the links instead of a hole. The padding keeps the
+     links centred in the space BELOW the bar, as before. */
   .nav__links{
-    position:fixed; inset:var(--navh) 0 0 0;
+    position:fixed; inset:0;
+    padding:var(--navh) var(--pad) 0;
     flex-direction:column; justify-content:center; gap:1.6rem;
     background:var(--royal-dp);
     transform:translateY(-100%); opacity:0; pointer-events:none;
     transition:transform .5s var(--ease-io), opacity .35s;
   }
+  /* the panel is a later sibling, so without this it would paint over the very
+     button that closes it */
+  .brand, .burger{ position:relative; z-index:1; }
   .nav__links.is-open{ transform:none; opacity:1; pointer-events:auto; }
   .nav__links a{ font-size:1rem; letter-spacing:.2em; }
 }
@@ -923,17 +965,6 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
    equivalent on the home page is defined here.
    ========================================================================== */
 
-/* The home page's bar is transparent until you scroll past 72% of the hero,
-   because for that whole distance it sits on a dark photograph. This page has
-   no full-height hero: the header band ends after ~60svh, so between there and
-   the scroll threshold a transparent bar would put white nav text on the white
-   mission section — invisible, with nothing in the console. Pages without a
-   photographic hero carry .is-solid and skip the transparent state entirely. */
-#nav.is-solid{
-  background:rgba(var(--royal-rgb),.97);
-  backdrop-filter:blur(10px);
-  box-shadow:0 3px 0 rgba(var(--orange-rgb),.95);
-}
 /* the current page keeps its underline lit rather than waiting for a hover */
 .nav__links a[aria-current="page"]::after{ transform:scaleX(1); transform-origin:left; }
 
