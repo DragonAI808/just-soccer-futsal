@@ -668,8 +668,13 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
 .latest{
   padding:clamp(3rem,7vh,5rem) var(--pad) clamp(3.5rem,8vh,6rem);
   max-width:var(--maxw); margin-inline:auto;
+  /* One width for the whole strip, so the head and the covers cannot drift
+     apart. The reels are 9:16 - at full page width the pair sat marooned on
+     the left with the section heading running out past them. */
+  --strip:44rem;
 }
 .latest__head{
+  max-width:var(--strip); margin-inline:auto;
   display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between;
   gap:.6rem 1.5rem;
 }
@@ -687,7 +692,7 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
   margin-top:clamp(1.5rem,3vh,2.2rem);
   display:grid; gap:clamp(1rem,2.5vw,2rem);
   grid-template-columns:repeat(auto-fit,minmax(min(100%,15rem),1fr));
-  max-width:44rem;
+  max-width:var(--strip); margin-inline:auto;
 }
 .reel{ display:flex; flex-direction:column; gap:.85rem; }
 
@@ -726,6 +731,7 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
   font-size:.9rem; color:var(--ink-soft); line-height:1.45;
 }
 .latest__note{
+  max-width:var(--strip); margin-inline:auto;
   margin-top:clamp(1.4rem,3vh,2rem);
   font-size:.76rem; letter-spacing:.04em; color:var(--ink-soft); opacity:.75;
 }

@@ -357,6 +357,32 @@ with sync_playwright() as p:
         check(f"no document overflow at {narrow}px", over, 0)
         nb.close()
 
+    print("\n[8b] THE REEL STRIP IS CENTRED")
+
+    # The covers are 9:16, so the pair is much narrower than the page. Left
+    # aligned they sat marooned with the section heading running out past them.
+    # Head, row and closing note share one --strip width so they cannot drift.
+    for w in (1920, 1440, 1024):
+        cp = b.new_page(viewport={"width": w, "height": 900})
+        cp.goto(URL)
+        cp.wait_for_load_state("networkidle")
+        settled(cp)
+        cp.evaluate("document.querySelectorAll('[data-reveal]').forEach(e=>e.classList.add('is-in'))")
+        cp.locator(".latest").scroll_into_view_if_needed()
+        cp.wait_for_timeout(400)
+        m = cp.evaluate("""() => {
+            const R = s => { const r = document.querySelector(s).getBoundingClientRect();
+                             return [Math.round(r.left), Math.round(r.right)]; };
+            return { head: R('.latest__head'), row: R('.latest__row'),
+                     note: R('.latest__note'), vw: window.innerWidth };
+        }""")
+        left, right = m["row"][0], m["vw"] - m["row"][1]
+        check(f"reel strip is centred at {w}px (gaps {left}/{right})",
+              abs(left - right) <= 2, True)
+        check(f"head, covers and note share one edge at {w}px",
+              [m["head"], m["note"]], [m["row"], m["row"]])
+        cp.close()
+
     print("\n[9b] THE MENU PANEL MUST BE OPAQUE, SCROLLED OR NOT")
 
     # Two separate bugs lived here, both invisible at the top of the page.
