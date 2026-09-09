@@ -287,9 +287,21 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
    reading, which is the only time a fixed bar's height is actually expensive.
    The badge has no white ground to key out - it has a real alpha channel - so
    it needs no chip and no plate at either size. */
+/* The badge and the wordmark shrink TOGETHER on scroll. --brand-txt is the one
+   value that drives both lines of type, so the name and the strapline can never
+   end up scaled differently, and it changes on the same class and the same
+   easing curve as the badge's width — one movement, not two that nearly match.
+
+   Sizes are chosen so the BADGE still sets the bar's height in both states: at
+   the top it is 6.2rem wide and ~93px tall against ~36px of type, and stuck it
+   is 3.4rem against ~25px. The bar therefore does not grow, which is the thing
+   that made two earlier attempts at this wrong. */
 .brand{
+  --brand-txt:1.6rem;
   display:flex; align-items:center; gap:.7rem; color:var(--paper);
 }
+#nav.is-stuck .brand{ --brand-txt:.95rem; }
+
 .brand__mark{
   width:6.2rem; height:auto; flex:none;
   transition:width .4s var(--ease), transform .3s var(--ease);
@@ -297,17 +309,23 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
 #nav.is-stuck .brand__mark{ width:3.4rem; }
 
 @media (max-width:560px){
+  .brand{ --brand-txt:1.15rem; }
+  #nav.is-stuck .brand{ --brand-txt:.82rem; }
   .brand__mark{ width:4.4rem; }
   #nav.is-stuck .brand__mark{ width:2.9rem; }
 }
 .brand:hover .brand__mark{ transform:rotate(-6deg) scale(1.05); }
 .brand__txt{
   font-family:var(--display); text-transform:uppercase;
-  font-size:.95rem; line-height:.98; letter-spacing:.04em;
+  font-size:var(--brand-txt); line-height:.98; letter-spacing:.04em;
+  /* matches the badge's width transition exactly, or the two arrive apart */
+  transition:font-size .4s var(--ease);
 }
 .brand__txt small{
-  display:block; font-size:.55rem; letter-spacing:.24em; opacity:.78;
+  display:block; font-size:calc(var(--brand-txt) * .58);
+  letter-spacing:.24em; opacity:.78;
   font-family:var(--sans); font-weight:600;
+  transition:font-size .4s var(--ease);
 }
 
 .nav__links{ display:flex; align-items:center; gap:clamp(1rem,2.2vw,2.1rem); }

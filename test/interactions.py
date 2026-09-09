@@ -357,6 +357,68 @@ with sync_playwright() as p:
         check(f"no document overflow at {narrow}px", over, 0)
         nb.close()
 
+    print("\n[7b] THE BRAND LOCKUP SHRINKS AS ONE PIECE")
+
+    # Two earlier attempts at the header got this wrong in opposite directions:
+    # once the bar grew to a permanent 112px, once the words shrank while the
+    # badge stayed big. So assert the actual relationship, not the numbers:
+    # badge and type both shrink, by a similar proportion, and the BADGE still
+    # sets the bar's height in both states so the bar itself cannot grow.
+    bp = b.new_page(viewport={"width": 1440, "height": 900})
+    bp.goto(URL)
+    bp.wait_for_load_state("networkidle")
+    settled(bp)
+
+    def lockup():
+        return bp.evaluate("""() => {
+            const nav = document.getElementById('nav').getBoundingClientRect();
+            const mark = document.querySelector('.brand__mark').getBoundingClientRect();
+            const txt = document.querySelector('.brand__txt');
+            const sml = txt.querySelector('small');
+            return { navH: Math.round(nav.height),
+                     markW: mark.width, markH: mark.height,
+                     txt: parseFloat(getComputedStyle(txt).fontSize),
+                     sml: parseFloat(getComputedStyle(sml).fontSize),
+                     txtH: txt.getBoundingClientRect().height
+                           + sml.getBoundingClientRect().height };
+        }""")
+
+    at(bp, 0)
+    bp.wait_for_timeout(700)          # let the .4s transition settle
+    top = lockup()
+    at(bp, 3000)
+    bp.wait_for_timeout(700)
+    stuck = lockup()
+
+    check_true(f"the badge shrinks ({top['markW']:.0f} -> {stuck['markW']:.0f}px)",
+               stuck["markW"] < top["markW"] * 0.75)
+    check_true(f"and the wordmark shrinks with it ({top['txt']:.0f} -> {stuck['txt']:.0f}px)",
+               stuck["txt"] < top["txt"] * 0.75)
+    check_true(f"and the strapline too ({top['sml']:.1f} -> {stuck['sml']:.1f}px)",
+               stuck["sml"] < top["sml"] * 0.75)
+
+    # They must shrink by a COMPARABLE proportion. "The words shrank while the
+    # logo stayed big" passes every check above, so this is the one that matters.
+    # Not identical, deliberately: type has a legibility floor a graphic does
+    # not, and forcing exact parity would drop the strapline to about 7.6px.
+    # Within 0.06 keeps them reading as one movement.
+    badge_ratio = stuck["markW"] / top["markW"]
+    txt_ratio = stuck["txt"] / top["txt"]
+    check_true(f"badge and words scale together (badge {badge_ratio:.2f}x, "
+               f"words {txt_ratio:.2f}x)", abs(badge_ratio - txt_ratio) < 0.06)
+    check("the strapline keeps its ratio to the name",
+          round(top["sml"] / top["txt"], 2), round(stuck["sml"] / stuck["txt"], 2))
+
+    # The bar must not grow to fit the bigger type.
+    check_true(f"the badge still sets the bar height at rest "
+               f"({top['markH']:.0f}px badge vs {top['txtH']:.0f}px type)",
+               top["markH"] > top["txtH"])
+    check_true(f"and when stuck ({stuck['markH']:.0f} vs {stuck['txtH']:.0f}px)",
+               stuck["markH"] > stuck["txtH"])
+    check_true(f"the bar is shorter when stuck, not taller "
+               f"({top['navH']} -> {stuck['navH']}px)", stuck["navH"] < top["navH"])
+    bp.close()
+
     print("\n[8b] THE REEL STRIP IS CENTRED")
 
     # The covers are 9:16, so the pair is much narrower than the page. Left
@@ -600,6 +662,14 @@ with sync_playwright() as p:
                  footBase: t('.foot__base p'), navLink: t('.nav__links a:not(.btn)'),
                  navBtn: t('.nav__links .btn'), brand: t('.brand__txt') };
     }"""
+    # Both pages must be in the SAME scroll state before comparing. The brand
+    # lockup is now size-dependent on .is-stuck, so a home page left scrolled
+    # from an earlier check reads 15.2px against About's 24px and reports a
+    # drift that is really just two different states.
+    for page in (pg, ab):
+        page.evaluate("window.scrollTo({top:0, behavior:'instant'})")
+    pg.wait_for_timeout(800)          # let the .4s brand transition settle
+    ab.wait_for_timeout(100)
     chrome_home = pg.evaluate(CHROME)
     chrome_about = ab.evaluate(CHROME)
     for part in chrome_home:
