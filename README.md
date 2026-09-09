@@ -146,8 +146,24 @@ difference *is* the parallax.
 
 The push peaks at **1.52×** on the centre-circle ball graphic — `.hero__frame`
 overrides `transform-origin` to 54% 74% so the camera converges on the ball
-rather than on the middle of the frame. At that scale the image renders 2408px
-wide from a 2400px source, so it stays sharp; go much deeper and it will soften.
+rather than on the middle of the frame.
+
+**That peak is what sets the hero's resolution ceiling, and it is lower than it
+looks.** At the deepest point the image has to cover roughly 1.67x the viewport
+width in device pixels. Measured against the 2400px file:
+
+| Viewport | Device px needed at the peak | Upscale |
+|---|---|---|
+| 1280 | 2140 | 0.89x - sharp |
+| 1440 | 2408 | 1.00x - exactly at the limit |
+| 1600 | 2675 | 1.11x - fine |
+| 1920 | 3210 | **1.34x - visibly soft** |
+| 2560 | 4280 | **1.78x - clearly soft** |
+
+An earlier version of this file said the hero "stays sharp" full stop. That was
+measured at 1440 and only ever true there. It is sharp to about 1700px of
+viewport and softens above it, at the moment the camera is deepest - which is
+also the moment someone is most likely to be looking at it.
 
 **Phones get half of it.** The rail drops to 160svh and `site.js` halves every
 camera value at the same breakpoint, peaking at ~1.26. The phone crop is capped
@@ -287,10 +303,13 @@ and is covered in section 2. The Czech stock placeholders are gone.
 
 Two ceilings worth knowing:
 
+All figures below are measured, not estimated - see "The multiplane camera"
+for the hero method and `test/interactions.py` for the arena.
+
 | Asset | Native size | Consequence |
 |---|---|---|
-| `Futsal 4.jpg` (hero) | 2500px | Plenty. No issue. |
-| `Futsal wide angle pics-126.jpg` | **1291px** | Mild upscale in the arena band; the scrim hides it. Don't promote it to a full-height hero. |
+| `Futsal 4.jpg` (hero) | 2500px | Sharp to ~1700px of viewport. **1.34x upscale at 1920, 1.78x at 2560**, at the deepest point of the push-in. A 4000px original would cover every monitor; 2500px is all their CDN has. |
+| `Futsal wide angle pics-126.jpg` | **1291px** | The worse of the two, and it starts sooner: fine to 1440, **1.26x at 1600, 1.51x at 1920, 2.01x at 2560**. The scrim hides some of it, not all. Don't promote it to a full-height hero. |
 | `logo-source.png` (badge) | **1298×1212, alpha** | No longer a constraint. Only a vector would beat it, and only for print. |
 
 **If you have the originals** — on a phone, a camera card, a hard drive — they are
