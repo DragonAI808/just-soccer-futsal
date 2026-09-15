@@ -416,6 +416,39 @@
   });
 
   /* ---------------------------------------------------------------
+     9b. The hero clip.
+
+         autoplay is on the tag so it starts without waiting for this
+         file, but two cases have to take it back off:
+
+         - prefers-reduced-motion. A looping background video is
+           exactly what that setting is asking us not to do, and CSS
+           cannot stop playback. Pausing is not enough either: a
+           paused video still shows its last decoded frame, so the
+           source is stripped as well and the poster is what remains.
+         - autoplay refused. Low power mode and some data-saver modes
+           block it even when muted. The play() promise rejects, and
+           without catching it the console fills with an unhandled
+           rejection on every load. The poster is already correct in
+           that case, so there is nothing to repair — just don't shout.
+     --------------------------------------------------------------- */
+  var heroVid = $('#heroVid');
+  if (heroVid) {
+    if (reduced) {
+      // The bytes are already handled declaratively: both <source> tags carry
+      // `(prefers-reduced-motion: no-preference)`, so under reduce NOTHING
+      // matches, nothing is fetched, and the poster is the hero. Measured: the
+      // page drops from 4.7MB to 716KB. This is only a belt-and-braces pause in
+      // case a browser matched a source anyway.
+      heroVid.removeAttribute('autoplay');
+      heroVid.pause();
+    } else {
+      var playing = heroVid.play();
+      if (playing && playing.catch) playing.catch(function () { /* poster stands in */ });
+    }
+  }
+
+  /* ---------------------------------------------------------------
      10. Small stuff
      --------------------------------------------------------------- */
   var yr = $('#yr');

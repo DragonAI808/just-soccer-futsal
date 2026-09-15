@@ -68,15 +68,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="assets/css/site.css?v=30">
+<link rel="stylesheet" href="assets/css/site.css?v=34">
 
-<!-- The hero photograph is the LCP element, so it is fetched at the highest
-     priority the browser will give it rather than waiting on the CSS. -->
-<link rel="preload" as="image" href="assets/img/hero-1600.webp" type="image/webp"
-      imagesrcset="assets/img/hero-1600.webp 1600w, assets/img/hero-2400.webp 2400w"
-      imagesizes="100vw" media="(min-width:701px)">
-<link rel="preload" as="image" href="assets/img/hero-portrait-1180.webp" type="image/webp"
-      media="(max-width:700px)">
+<!-- The hero POSTER is the LCP element now, not the photograph: it is what paints
+     while the clip is still arriving, and on a phone or under reduced motion it
+     is all that ever paints. Preloaded at high priority for that reason. The
+     video itself is deliberately NOT preloaded — preload="metadata" on the tag
+     keeps 4MB off the critical path. -->
+<link rel="preload" as="image" href="assets/img/hero-poster.webp" type="image/webp" fetchpriority="high">
 </head>
 
 <body>
@@ -133,16 +132,22 @@
        the netting sweeps past the lens. Depth is expressed purely as travel +
        growth, so there is no separate depth value that can fall out of sync. -->
   <div class="hero__plane hero__frame" data-cam data-cam-arc data-cam-y="-4" data-cam-scale="0.52">
-    <picture>
-      <source media="(max-width:700px)" type="image/webp" srcset="assets/img/hero-portrait-1180.webp">
-      <source media="(max-width:700px)" srcset="assets/img/hero-portrait-1180.jpg">
-      <!-- sizes overstates the box on purpose: the plane is scaled up mid-arc,
-           so the browser must pick the 2400w source or the push-in goes soft -->
-      <source type="image/webp" srcset="assets/img/hero-1600.webp 1600w, assets/img/hero-2400.webp 2400w" sizes="135vw">
-      <img class="hero__media" src="assets/img/hero-1600.jpg"
-           alt="Children training around the centre-circle ball graphic on the blue court at Just Soccer Futsal Center."
-           fetchpriority="high" decoding="async">
-    </picture>
+    <!-- The <source media> order matters: the browser takes the FIRST source
+         whose media query matches, so the 768px rule has to come before the
+         unconditional one or every screen would get the 1080 file.
+         preload="metadata" per the brief — it fetches the header, not the 4MB
+         body, so the poster shows immediately and the clip streams in after.
+         aria-label rather than alt: a <video> has no alt attribute, and this
+         one is decorative background, so it is also aria-hidden below. -->
+    <video class="hero__media" id="heroVid"
+           autoplay muted loop playsinline preload="metadata"
+           poster="assets/img/hero-poster.webp"
+           aria-hidden="true" tabindex="-1">
+      <source src="assets/img/hero-720.mp4" type="video/mp4"
+              media="(max-width:768px) and (prefers-reduced-motion: no-preference)">
+      <source src="assets/img/hero-1080.mp4" type="video/mp4"
+              media="(prefers-reduced-motion: no-preference)">
+    </video>
   </div>
   <div class="hero__scrim"></div>
 
@@ -538,6 +543,6 @@
   </div>
 </footer>
 
-<script src="assets/js/site.js?v=30"></script>
+<script src="assets/js/site.js?v=34"></script>
 </body>
 </html>

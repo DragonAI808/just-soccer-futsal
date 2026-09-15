@@ -114,6 +114,46 @@ with sync_playwright() as p:
     check_true("arena starts zoomed in", (arena_in or 0) > 1.05)
     check("arena settles to scale 1", round(arena_seated or 0, 2), 1.0)
 
+    print("\n[1b] THE HERO CLIP")
+
+    # The video is by far the heaviest thing on the site, and most of the ways
+    # it breaks are silent: it letterboxes, or it never plays, or it quietly
+    # ships 4MB to someone who asked for reduced motion.
+    hv = pg.evaluate("""() => {
+        const v = document.getElementById('heroVid');
+        if (!v) return null;
+        const r = v.getBoundingClientRect();
+        const plane = document.querySelector('.hero__frame').getBoundingClientRect();
+        return { src: (v.currentSrc || '').split('/').pop(),
+                 vw: v.videoWidth, vh: v.videoHeight,
+                 box: [Math.round(r.width), Math.round(r.height)],
+                 plane: [Math.round(plane.width), Math.round(plane.height)],
+                 fit: getComputedStyle(v).objectFit,
+                 paused: v.paused, muted: v.muted, loop: v.loop,
+                 inline: v.hasAttribute('playsinline'),
+                 preload: v.getAttribute('preload'),
+                 poster: (v.getAttribute('poster') || '').split('/').pop(),
+                 hidden: v.getAttribute('aria-hidden') };
+    }""")
+    check_true("the hero is a video", hv is not None)
+    check("desktop takes the 1080 clip", hv["src"], "hero-1080.mp4")
+    # object-fit:cover plus an explicit 100%/100% box is what stops the black
+    # bars: a <video> has its own intrinsic 16:9 size and will letterbox inside
+    # any pane that is not exactly that shape.
+    check("it fills the hero plane exactly, no letterboxing", hv["box"], hv["plane"])
+    check("via object-fit: cover", hv["fit"], "cover")
+    check_true("the source really is 16:9", abs(hv["vw"] / hv["vh"] - 16 / 9) < 0.01)
+    check_true("and the pane is NOT, so cover is doing real work",
+               abs(hv["plane"][0] / hv["plane"][1] - 16 / 9) > 0.05)
+    check_true("it is playing", not hv["paused"])
+    for flag in ("muted", "loop", "inline"):
+        check_true(f"it is {flag}", hv[flag])
+    check("preload is metadata, not auto", hv["preload"], "metadata")
+    check("the poster is the webp", hv["poster"], "hero-poster.webp")
+    # Decorative background: a screen reader announcing an unlabelled <video>
+    # in the middle of the headline is noise, and it must not be a tab stop.
+    check("it is hidden from assistive tech", hv["hidden"], "true")
+
     print("\n[2] STATEMENT — words light up through the block")
     stmt_y = pg.locator(".stmt").evaluate("e => e.offsetTop")
     at(pg, stmt_y - 700)
@@ -333,8 +373,11 @@ with sync_playwright() as p:
     check("body scroll is restored",
           ph.evaluate("document.body.style.overflow"), "")
 
-    check("phone hero uses the portrait crop",
-          "portrait" in ph.locator(".hero__media").evaluate("e => e.currentSrc"), True)
+    # The hero is a video now, not an art-directed portrait crop. What matters
+    # on a phone is that it takes the SMALLER file: 2.6MB instead of 4.0MB, on
+    # the connection least able to afford either.
+    check("phone hero takes the 720 clip, not the 1080",
+          "hero-720.mp4" in ph.locator("#heroVid").evaluate("e => e.currentSrc"), True)
 
     # Narrow widths, WITHOUT mobile emulation. Playwright's is_mobile pins
     # innerWidth at 392 whatever viewport you ask for, so a phone-emulated page
@@ -742,6 +785,32 @@ with sync_playwright() as p:
             over.append(w)
         nb.close()
     check("About does not overflow sideways at any width", over, [])
+
+    print("\n[13b] REDUCED MOTION MUST NOT PAY FOR THE CLIP")
+
+    # Both <source> tags are gated on (prefers-reduced-motion: no-preference),
+    # so under reduce nothing matches and nothing is fetched — the poster is the
+    # hero. Pausing in JS was not enough on its own: preload had already pulled
+    # the whole 4MB before the script ran. Measured 4.7MB -> 790KB.
+    rmc = b.new_context(viewport={"width": 1440, "height": 900}, reduced_motion="reduce")
+    rp = rmc.new_page()
+    vid_bytes = []
+    rp.on("response", lambda r: vid_bytes.append(r.url) if ".mp4" in r.url else None)
+    rp.goto(URL)
+    rp.wait_for_load_state("networkidle")
+    settled(rp)
+    rp.wait_for_timeout(1500)
+    check("no video is downloaded under reduced motion", vid_bytes, [])
+    rmv = rp.evaluate("""() => {
+        const v = document.getElementById('heroVid');
+        return { src: v.currentSrc || '', paused: v.paused,
+                 poster: (v.getAttribute('poster') || '').split('/').pop() };
+    }""")
+    check("no source resolves", rmv["src"], "")
+    check_true("the video is paused", rmv["paused"])
+    check("and the poster still stands in", rmv["poster"], "hero-poster.webp")
+    rp.close()
+    rmc.close()
 
     # The founder picture must clear the touchline BADGE, not just the rule.
     # The circle hangs half its diameter below the line and the crest's halftone

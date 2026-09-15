@@ -28,6 +28,8 @@ assets/img/logo-source.png  the club badge, 1298x1212 with alpha (master)
 assets/img/logo-{720,260}.webp  derived sizes actually used by the page
 assets/img/favicon-180.png  tab icon (the ball, cropped from the master)
 assets/img/og-1200x630.jpg  social share card
+assets/img/hero-{1080,720}.mp4  the hero clip, H.264 (1080 desktop, 720 at <=768px)
+assets/img/hero-poster.{webp,jpg}  first frame; the LCP element and the reduced-motion fallback
 assets/img/coach-source.png the Coach Ernie illustration, 1122x1402 (master)
 assets/img/coach-900.{webp,jpg}  derived size used by about.html
 assets/docs/clinic-waiver.pdf   the club's liability waiver, linked from the footer
@@ -50,7 +52,7 @@ suite enforces parts of it.
 
 | Section | Notes |
 |---|---|
-| Hero | **Multiplane parallax with a scroll-driven camera** — see below. Headline rises word by word. Phones get an art-directed portrait crop, not a squeezed landscape. |
+| Hero | A **looping background clip** behind the multiplane camera — see below. Headline rises word by word. Phones take the 720 file; reduced motion takes neither. |
 | Ticker | Infinite marquee of what runs at the center. Pauses on hover. |
 | **Tonight** | An arena **scoreboard** carrying the hours. It is second on the page because "is it open" is the question most visitors arrive with. |
 | Statement | The mission. Words light up one at a time as you scroll through. |
@@ -119,11 +121,55 @@ order of the three nav-state rules matters. `.is-stuck`, `.is-solid` and
 `.is-menu-open` must come last, because it is the one that removes the
 `backdrop-filter`. See the comment on it: that removal is load-bearing.
 
+### The hero clip
+
+The far plane holds a **looping H.264 video** rather than a photograph:
+
+```html
+<video class="hero__media" id="heroVid"
+       autoplay muted loop playsinline preload="metadata"
+       poster="assets/img/hero-poster.webp" aria-hidden="true" tabindex="-1">
+  <source src="assets/img/hero-720.mp4"  media="(max-width:768px) and (prefers-reduced-motion: no-preference)">
+  <source src="assets/img/hero-1080.mp4" media="(prefers-reduced-motion: no-preference)">
+</video>
+```
+
+Four things in there are load bearing:
+
+- **`<source media>` order.** The browser takes the FIRST matching source, so
+  the 768px rule has to come before the unconditional one. Reverse them and
+  every phone gets the 4MB file.
+- **`(prefers-reduced-motion: no-preference)` on BOTH sources.** Under reduce,
+  nothing matches, nothing is fetched, and the poster is the hero. This is the
+  whole reduced-motion story — pausing in JS was tried first and was not
+  enough, because `preload` had already pulled the full 4MB before the script
+  ran. Measured: **4.7MB → 790KB.**
+- **`object-fit:cover` plus explicit `width:100%; height:100%`.** Unlike an
+  `<img>`, a `<video>` has its own intrinsic 1920x1080 box. Without those it
+  sits at that size inside the plane and letterboxes on any window that is not
+  exactly 16:9. This is where "black bars" come from.
+- **`aria-hidden` + `tabindex="-1"`.** It is decorative background. A `<video>`
+  has no `alt`, and an unlabelled one announced in the middle of the headline
+  is noise.
+
+**The scrim was re-tuned for it.** The clip is much brighter than the
+photograph it replaced — a lit ceiling and a sunlit floor where there used to
+be a dim hall. Measured across six frames, the eyebrow fell to **3.10:1**
+against a needed 4.5 and the stat figures to 4.69, both worst around t=8s. A
+radial pool was added behind the copy block in the bottom left, which brings
+them to **4.76** and **5.88**. It is a pool and not a flat wash on purpose:
+darkening the whole frame to fix one corner would throw away the openness at
+the top, which is the part of the shot worth having.
+
+**Page weight roughly quintupled** — 842KB to 4.7MB on desktop, 616KB to 3.3MB
+on a phone. That is the price of the hero and it was paid knowingly. If it ever
+needs to come down, the 720 file at 2.6MB is the one to shorten or re-encode.
+
 ### The multiplane camera
 
 The hero sits in a **250svh rail** with a `position: sticky` pane inside it, and
-four planes driven by one scroll progress. It opens on the whole photograph,
-pushes in to the centre-circle ball graphic, and **pulls back out** before the
+four planes driven by one scroll progress. It opens on the whole frame,
+pushes in to the centre of the court, and **pulls back out** before the
 page moves on — an arc, not a one-way ramp. The whole move happens while the
 frame is pinned, over about 1.5 screens of scroll.
 
@@ -308,7 +354,7 @@ for the hero method and `test/interactions.py` for the arena.
 
 | Asset | Native size | Consequence |
 |---|---|---|
-| `Futsal 4.jpg` (hero) | 2500px | Sharp to ~1700px of viewport. **1.34x upscale at 1920, 1.78x at 2560**, at the deepest point of the push-in. A 4000px original would cover every monitor; 2500px is all their CDN has. |
+| ~~`Futsal 4.jpg` (hero)~~ | 2500px | **No longer used.** The hero is a video now, which retired this ceiling entirely — see "The hero clip". The five `hero-1600` / `hero-2400` / `hero-portrait-1180` files are orphaned and can be deleted once you are sure the video is staying. |
 | `Futsal wide angle pics-126.jpg` | **1291px** | The worse of the two, and it starts sooner: fine to 1440, **1.26x at 1600, 1.51x at 1920, 2.01x at 2560**. The scrim hides some of it, not all. Don't promote it to a full-height hero. |
 | `logo-source.png` (badge) | **1298×1212, alpha** | No longer a constraint. Only a vector would beat it, and only for print. |
 

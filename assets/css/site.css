@@ -442,10 +442,20 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
    framed photograph), so the push-in converges on it rather than on the middle
    of the frame. That is the thing worth arriving at. */
 .hero__frame{ inset:-5%; overflow:hidden; transform-origin:54% 74%; }
+/* object-fit:cover is what stops the black bars: the clip is a fixed 16:9 and
+   the hero pane is whatever shape the window is, so the frame is filled and the
+   overflow cropped rather than letterboxed. The explicit width/height are load
+   bearing for a <video> — unlike an <img> it has its own intrinsic 1920x1080
+   box, and without these it would sit at that size inside the plane and leave
+   bars top and bottom on any window that is not exactly 16:9.
+   background keeps the crop dark rather than white for the instant before the
+   poster paints. */
 .hero__media{
   width:100%; height:100%;
   object-fit:cover; object-position:50% 60%;
   transform-origin:50% 52%;
+  background:var(--royal-dp);
+  display:block;
 }
 
 /* mid plane — the court markings, drawn not photographed */
@@ -479,9 +489,24 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
   -webkit-mask-image:radial-gradient(135% 100% at 50% 108%, #000 8%, transparent 68%);
           mask-image:radial-gradient(135% 100% at 50% 108%, #000 8%, transparent 68%);
 }
+/* Three layers, front to back. The first is new and exists for one reason:
+   the clip is far brighter than the photograph this scrim was originally tuned
+   against — a lit pale ceiling and a sunlit blue floor where there used to be a
+   dim hall. Measured across six frames, the eyebrow fell to 3.10:1 against a
+   needed 4.5 and the stat figures to 4.69, both worst around t=8s when the
+   camera is over the brightest part of the floor.
+
+   It is a POOL behind the copy block in the bottom left, not a flat wash over
+   the whole frame: darkening everything to fix one corner would have thrown
+   away the openness at the top, which is the part of the drone shot worth
+   having. Everything above and right of the copy is untouched. */
 .hero__scrim{
   position:absolute; inset:0; z-index:-2;
   background:
+    radial-gradient(130% 96% at 6% 86%,
+                    rgba(var(--royal-dp-rgb),.84) 0%,
+                    rgba(var(--royal-dp-rgb),.52) 46%,
+                    rgba(var(--royal-dp-rgb),0) 74%),
     linear-gradient(180deg, rgba(var(--royal-dp-rgb),.76) 0%, rgba(var(--royal-dp-rgb),.20) 32%,
                             rgba(var(--royal-dp-rgb),.66) 70%, rgba(var(--royal-dp-rgb),.96) 100%),
     linear-gradient(90deg, rgba(var(--royal-rgb),.50), rgba(var(--royal-rgb),.06));
