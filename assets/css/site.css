@@ -662,8 +662,10 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
   gap:.6rem 1.5rem; padding-bottom:1.1rem; margin-bottom:1.4rem;
   border-bottom:3px solid rgba(var(--paper-rgb),.18);
 }
+/* a step up from .7rem: at that size the two board captions read as fine print
+   on a panel whose whole job is to be legible across a room */
 .board__label{
-  font-size:.7rem; font-weight:700; letter-spacing:.28em; text-transform:uppercase;
+  font-size:.8rem; font-weight:700; letter-spacing:.28em; text-transform:uppercase;
   color:var(--orange-lt);
 }
 .board__live{ display:flex; align-items:center; gap:.5rem; }
@@ -681,8 +683,21 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
 }
 .board__row:last-child{ border-bottom:0; }
 .board__row dt{
-  font-size:.82rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase;
+  font-size:.95rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase;
   color:rgba(var(--chalk-rgb),.72);
+}
+/* "Monday – Friday" is 15 characters, and at .14em the tracking alone adds
+   about 32px to it — enough to tip the label onto a second line once the size
+   went up, which made that one row taller than the rest and broke the board's
+   rhythm. Tracking is the cheaper thing to give back than the size. Below 400px
+   the row stacks instead: at that width there is no arrangement where a
+   15-character label and a 13-character time share a line. */
+@media (max-width:460px){
+  .board__row dt{ letter-spacing:.08em; }
+}
+@media (max-width:400px){
+  .board__row{ grid-template-columns:1fr; gap:.1rem; padding:.85rem 0; }
+  .board__row dd{ justify-self:start; }
 }
 /* the numerals are the point — big, amber, monospaced by tabular figures so
    the times line up in a column like a real board */
