@@ -727,9 +727,12 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
   padding:clamp(3rem,7vh,5rem) var(--pad) clamp(3.5rem,8vh,6rem);
   max-width:var(--maxw); margin-inline:auto;
   /* One width for the whole strip, so the head and the covers cannot drift
-     apart. The reels are 9:16 - at full page width the pair sat marooned on
-     the left with the section heading running out past them. */
-  --strip:44rem;
+     apart. The reels are 9:16 - at full page width they sit marooned on the
+     left with the section heading running out past them.
+     Sized for THREE covers now. At the old 44rem a third one could not fit
+     beside the other two - auto-fit would have dropped it to a second row on
+     its own, which reads as a mistake rather than a layout. */
+  --strip:60rem;
 }
 .latest__head{
   max-width:var(--strip); margin-inline:auto;
@@ -746,11 +749,20 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
 }
 .latest__all:hover, .latest__all:focus-visible{ border-color:var(--orange); }
 
+/* Explicit 3, not auto-fit. With three covers auto-fit produced a 2 + 1 at
+   tablet widths — one reel orphaned on its own row, which reads as a mistake
+   rather than a layout. Three or one, nothing in between.
+   IF THE NUMBER OF REELS CHANGES, change the 3 here to match. */
 .latest__row{
   margin-top:clamp(1.5rem,3vh,2.2rem);
   display:grid; gap:clamp(1rem,2.5vw,2rem);
-  grid-template-columns:repeat(auto-fit,minmax(min(100%,15rem),1fr));
+  grid-template-columns:repeat(3,minmax(0,1fr));
   max-width:var(--strip); margin-inline:auto;
+}
+@media (max-width:720px){
+  /* below this, three covers are under ~200px wide and stop reading. The cap
+     keeps a single stacked cover from going full-bleed on a small tablet. */
+  .latest__row{ grid-template-columns:1fr; max-width:22rem; }
 }
 .reel{ display:flex; flex-direction:column; gap:.85rem; }
 

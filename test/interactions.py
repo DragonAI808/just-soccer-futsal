@@ -333,7 +333,9 @@ with sync_playwright() as p:
 
     check("no Meta request on page load", meta_hosts(), [])
     check("no cookies set on page load", len(ig_ctx.cookies()), 0)
-    check("both reels render as facades", ig.locator(".reel .reel__btn").count(), 2)
+    REELS = 3
+    check("every reel renders as a facade",
+          ig.locator(".reel .reel__btn").count(), REELS)
     check("no live embed before a click", ig.locator(".reel.is-live").count(), 0)
     # The covers must be self-hosted, or the facade leaks the request it exists to prevent.
     covers = ig.evaluate("""() => [...document.querySelectorAll('.reel__btn img')]
@@ -348,7 +350,8 @@ with sync_playwright() as p:
     check_true("clicking a reel marks it live", ig.locator(".reel.is-live").count() == 1)
     check_true("clicking a reel reaches Instagram", len(meta_hosts()) > 0)
     check_true("an embed iframe was built", ig.locator(".reel.is-live iframe").count() >= 1)
-    check("the other reel is still a facade", ig.locator(".reel:not(.is-live)").count(), 1)
+    check("the others are still facades",
+          ig.locator(".reel:not(.is-live)").count(), REELS - 1)
     ig_ctx.close()
 
     # ---------------- phone ----------------
@@ -486,6 +489,31 @@ with sync_playwright() as p:
               abs(left - right) <= 2, True)
         check(f"head, covers and note share one edge at {w}px",
               [m["head"], m["note"]], [m["row"], m["row"]])
+        # With three covers, auto-fit used to give 2 + 1 at tablet widths — one
+        # reel orphaned on its own row. Three across or one down, never a
+        # remainder. Compare the tops: same row means same top.
+        #
+        # The wait is load-bearing. Each tile reveals on a stagger (the third
+        # carries --d:.2s), and a tile mid-transition still has translateY on
+        # it, so its top differs and three-on-one-row reads as three rows.
+        cp.wait_for_timeout(1400)
+        tops = cp.evaluate("""() => [...new Set([...document.querySelectorAll('.reel')]
+            .map(e => Math.round(e.getBoundingClientRect().top)))].length""")
+        check(f"all three covers sit on one row at {w}px", tops, 1)
+        cp.close()
+
+    # ...and at tablet widths it must stack cleanly rather than orphan one.
+    for w, want_rows in ((768, 1), (720, 3), (390, 3)):
+        cp = b.new_page(viewport={"width": w, "height": 900})
+        cp.goto(URL)
+        cp.wait_for_load_state("networkidle")
+        settled(cp)
+        cp.evaluate("document.querySelectorAll('[data-reveal]').forEach(e=>e.classList.add('is-in'))")
+        cp.locator(".latest").scroll_into_view_if_needed()
+        cp.wait_for_timeout(1600)
+        tops = cp.evaluate("""() => [...new Set([...document.querySelectorAll('.reel')]
+            .map(e => Math.round(e.getBoundingClientRect().top)))].length""")
+        check(f"{w}px lays the reels out {want_rows} row(s), no orphan", tops, want_rows)
         cp.close()
 
     print("\n[9b] THE MENU PANEL MUST BE OPAQUE, SCROLLED OR NOT")

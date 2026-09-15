@@ -246,7 +246,7 @@ Three things that are load-bearing and not obvious:
 
 ## Swapping the Instagram reels
 
-The two reels under the scoreboard are **facades**: a self-hosted cover image
+The three reels under the scoreboard are **facades**: a self-hosted cover image
 plus a play badge. Instagram is contacted only when a visitor clicks one. To
 change a reel you need its id (the code in its URL) and a cover image.
 
@@ -265,7 +265,27 @@ ffmpeg -i cover.jpg -q:v 4 -y assets/img/reel-NAME.jpg
 ```
 
 Then in `index.html` update that tile's `data-reel` id, its two image paths, the
-`alt` text and the `.reel__cap` line. Nothing in the CSS or JS changes.
+`alt` text and the `.reel__cap` line. Nothing in the JS changes.
+
+Two things that are easy to get wrong:
+
+- **Check the derived files are actually smaller than the source.** Instagram's
+  thumbnails are already well compressed. On the third reel, a q82 webp came out
+  *bigger* than the 87KB source, and every JPEG re-encode was bigger too. q72
+  won by 10%; the JPEG fallback is the original, untouched, because re-encoding
+  it both grew it and cost a generation of quality.
+- **Check for black bars.** That same thumbnail arrived with 80 black rows
+  across the top while the other two had none. It was cropped off and the frame
+  squared to exactly 9:16 (594x1056), so `object-fit` has nothing left to trim.
+  A quick way to spot this is to decode to raw RGB and average the top and
+  bottom few rows — near-zero means bars.
+
+**Adding or removing one is a CSS change too.** `.latest__row` is an explicit
+`repeat(3, ...)`, not `auto-fit`: with three covers auto-fit produced a 2 + 1 at
+tablet widths, one reel orphaned on its own row. Change the `3` to match the
+number of tiles, and check `--strip` on `.latest` still fits them — it went from
+44rem to 60rem when the third was added. The suite asserts they all sit on one
+row down to 768px and stack cleanly below.
 
 **Keep them current.** These posts are dated by nature — the Futsal Fridays reel
 literally says *"tomorrow"* in its Instagram caption, which is why the caption
