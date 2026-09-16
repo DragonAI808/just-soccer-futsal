@@ -322,6 +322,7 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
   #nav.is-stuck .brand__mark{ width:2.9rem; }
 }
 .brand:hover .brand__mark{ transform:rotate(-6deg) scale(1.05); }
+
 .brand__txt{
   font-family:var(--display); text-transform:uppercase;
   font-size:var(--brand-txt); line-height:.98; letter-spacing:.04em;
@@ -1320,6 +1321,44 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
   transition-delay:var(--d,0s);
 }
 .h2[data-reveal].is-in .h2__in{ clip-path:inset(-25% -5% -25% -5%); transform:none; }
+
+/* SHORT VIEWPORTS — landscape phones.
+   The bar is 112px at rest because the badge is 6.2rem, which is right on a
+   tall screen and wrong on a 390px one: it ate 29% of the height, and the
+   hero's bottom-anchored copy ran up underneath it. Measured on five landscape
+   phone sizes, the HEADLINE sat 23-41px behind the bar and the eyebrow
+   overlapped the wordmark outright.
+   The bar already knows how to be small — this is its stuck size, applied on
+   available height rather than waiting for a scroll that has not happened yet.
+   Keyed on height alone, so a short desktop window gets the same sense. */
+@media (max-height:520px){
+  #nav{ padding-top:.35rem; padding-bottom:.35rem; }
+  .brand__mark{ width:3.1rem; }
+  #nav.is-stuck .brand__mark{ width:2.8rem; }
+  .brand{ --brand-txt:.9rem; }
+  #nav.is-stuck .brand{ --brand-txt:.82rem; }
+  /* the hero block has to fit what is left: trim its floor and its type a step */
+  .hero__inner{ padding-bottom:clamp(1.5rem,5vh,2.5rem); }
+  .hero__title{ font-size:clamp(2rem,.5rem + 5vw,3.6rem); }
+  .hero__meta{ gap:.4rem 1.2rem; }
+}
+
+/* The open MENU has the same problem the hero had: six items centred with
+   1.6rem between them need more height than a landscape phone has, so the
+   last one ("Book a session" - the one that matters) ran off the bottom.
+   Measured 9-17px of spill at 375 and 360 tall.
+   Scoped to the width where the panel actually EXISTS; above 900px the nav is
+   a horizontal bar and none of this applies. */
+@media (max-height:520px) and (max-width:900px){
+  .nav__links{
+    justify-content:flex-start;
+    gap:.85rem;
+    padding:calc(var(--navh) + .75rem) var(--pad) 1.25rem;
+    overflow-y:auto;                 /* a backstop, not the plan */
+  }
+  .nav__links a{ font-size:.88rem; }
+  .nav__links .btn{ padding:.55rem 1.05rem; }
+}
 
 /* ==========================================================================
    REDUCED MOTION

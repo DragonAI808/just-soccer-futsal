@@ -9,6 +9,7 @@ Guards three separate things:
   3. the *facts* on the page still match the business, and no invented
      content has crept back in
 """
+import pathlib
 import sys
 from playwright.sync_api import sync_playwright
 
@@ -673,6 +674,74 @@ with sync_playwright() as p:
             mp.click("#burger")
             mp.wait_for_timeout(400)
         mp.close()
+
+    print("\n[9c] LANDSCAPE PHONES")
+
+    # The bar is 112px tall at rest — right on a tall screen, 29% of the height
+    # on a 390px one. In landscape the hero's bottom-anchored copy ran straight
+    # up underneath it: the headline sat 23-41px behind the bar and the eyebrow
+    # overlapped the wordmark outright. It only shrank on scroll, which is far
+    # too late to help.
+    for w, h, label in ((667, 375, "iPhone SE"), (740, 360, "small Android"),
+                        (844, 390, "iPhone 14"), (926, 428, "14 Pro Max")):
+        lp = b.new_page(viewport={"width": w, "height": h})
+        lp.goto(URL)
+        lp.wait_for_load_state("networkidle")
+        settled(lp)
+        lp.wait_for_timeout(600)
+        m = lp.evaluate("""() => {
+            const R = s => { const r = document.querySelector(s).getBoundingClientRect();
+                return { top: Math.round(r.top), bottom: Math.round(r.bottom) }; };
+            return { navBottom: R('#nav').bottom, eyebrow: R('.hero__inner .eyebrow').top,
+                     title: R('.hero__title').top, cta: R('.hero__cta').bottom,
+                     vh: window.innerHeight };
+        }""")
+        check_true(f"{label} {w}x{h}: hero copy clears the bar "
+                   f"(eyebrow {m['eyebrow'] - m['navBottom']:+}px)",
+                   m["eyebrow"] > m["navBottom"])
+        check_true(f"  ...and the CTA is above the fold "
+                   f"({m['cta']}/{m['vh']})", m["cta"] <= m["vh"])
+
+        # The open menu had the same problem: six items centred needed more
+        # height than there is, so "Book a session" ran off the bottom.
+        if lp.evaluate("() => getComputedStyle(document.getElementById('burger'))"
+                       ".display !== 'none'"):
+            lp.click("#burger")
+            lp.wait_for_timeout(600)
+            mm = lp.evaluate("""() => {
+                const links = [...document.querySelectorAll('#navLinks a')]
+                    .map(a => a.getBoundingClientRect());
+                return { first: Math.round(links[0].top),
+                         last: Math.round(links[links.length - 1].bottom),
+                         vh: window.innerHeight };
+            }""")
+            check_true(f"  ...and every menu item fits "
+                       f"({mm['first']}..{mm['last']} of {mm['vh']})",
+                       mm["first"] >= 0 and mm["last"] <= mm["vh"])
+        lp.close()
+
+    print("\n[9d] THE STYLESHEET NESTS CORRECTLY")
+
+    # A structural guard, not a visual one. Moving a media query by hand left a
+    # stray closing brace behind and swallowed the reduced-motion block INSIDE
+    # a max-height query — so reduced motion silently stopped applying on any
+    # normal screen. Nothing visual failed, and the whole suite still passed.
+    import re as _re
+    css = pathlib.Path("assets/css/site.css").read_text(encoding="utf-8")
+    flat = _re.sub(r"/\*.*?\*/", lambda m: _re.sub(r"[^\n]", " ", m.group(0)),
+                   css, flags=_re.S)
+    depth, went_negative, tops = 0, False, {}
+    for line in flat.split("\n"):
+        for q in ("prefers-reduced-motion", "max-height:520px"):
+            if "@media" in line and q in line:
+                tops.setdefault(q, []).append(depth)
+        depth += line.count("{") - line.count("}")
+        if depth < 0:
+            went_negative = True
+    check("every brace in site.css is balanced", depth, 0)
+    check_true("and none closes before it opens", not went_negative)
+    for q, depths in tops.items():
+        check(f"@media {q} is at the top level", depths, [0] * len(depths))
 
     print("\n[10] THE MENU MUST NOT STRAND ANYONE")
 
