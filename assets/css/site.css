@@ -35,6 +35,13 @@
   --navh: 3.35rem;
   --ease: cubic-bezier(.22,.61,.36,1);
   --ease-io: cubic-bezier(.65,.05,.36,1);
+
+  /* The touchline is a ZERO-HEIGHT line with a circle centred on it, so the
+     circle hangs half its diameter into whatever sits above and below. Any
+     section that ends against a touchline has to clear this, and it lives here
+     rather than in .touchline so the clearance and the circle cannot drift
+     apart — they did, and the Latest note ended up 5px inside the badge. */
+  --touchline-circle: clamp(5.4rem,12.5vw,9.6rem);
 }
 
 /* ---------- reset ---------- */
@@ -107,7 +114,7 @@ ul{ list-style:none; padding:0; }
 }
 .touchline::after{
   content:''; position:absolute; left:50%; top:50%;
-  width:clamp(5.4rem,12.5vw,9.6rem); aspect-ratio:1;
+  width:var(--touchline-circle); aspect-ratio:1;
   transform:translate(-50%,-50%);
   border:3px solid var(--chalkline); border-radius:50%;
   /* Opaque, not transparent: the touchline is drawn straight through the middle
@@ -724,7 +731,10 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
    outlives the visit, on every page view, for content most people never open.
    ========================================================================== */
 .latest{
-  padding:clamp(3rem,7vh,5rem) var(--pad) clamp(3.5rem,8vh,6rem);
+  /* Bottom padding clears the touchline's circle, which hangs half its
+     diameter above the line. At the old flat 6rem cap the circle reached 5px
+     INTO the closing note on a 1440 screen and further on a 1920. */
+  padding:clamp(3rem,7vh,5rem) var(--pad) calc(var(--touchline-circle) / 2 + 2.5rem);
   max-width:var(--maxw); margin-inline:auto;
   /* One width for the whole strip, so the head and the covers cannot drift
      apart. The reels are 9:16 - at full page width they sit marooned on the
@@ -735,9 +745,17 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
      there were three across. */
   --strip:40rem;
 }
+/* flex-start, NOT baseline. `.eyebrow` is itself a flex container with
+   align-items:center, so none of its children participate in baseline
+   alignment and the browser synthesises its baseline from the box edge instead
+   of the text. Aligned that way the See-all link's glyphs sat 6.3px above the
+   eyebrow's — consistently, at every width, which is what gave it away as
+   geometry rather than a rounding artifact.
+   Aligning the tops and nudging the link by its own padding puts the two
+   strings on the same line properly. */
 .latest__head{
   max-width:var(--strip); margin-inline:auto;
-  display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between;
+  display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:space-between;
   gap:.6rem 1.5rem;
 }
 .latest__head .eyebrow{ margin-bottom:0; }
@@ -752,7 +770,12 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
   margin-top:.45rem;
 }
 .latest__all{
-  display:inline-block; padding:.3rem 0;   /* 21px tall was under the 24px target minimum */
+  /* The padding is split unevenly on purpose. It exists to make the link a
+     24px target (21px was under it), but applied evenly it left the link's
+     cap-height 1.8px below the eyebrow's beside it. Shifting .1125rem from the
+     top to the bottom lines the two strings up without changing the target
+     height. Measured, not eyeballed - see .latest__head. */
+  display:inline-block; padding:.1875rem 0 .4125rem;
   font-size:.74rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
   color:var(--orange-ink);
   border-bottom:2px solid transparent;

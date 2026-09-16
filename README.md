@@ -244,6 +244,21 @@ Three things that are load-bearing and not obvious:
   box, so its rect is all zeros. That silently pinned it at `scale(1)` once
   already. If a zoom ever stops working, look there first.
 
+### The touchline needs clearance
+
+`--touchline-circle` in `:root` is the circle's diameter, and it is referenced
+in two places: the circle itself, and the bottom padding of the section that
+ends against it. That is not tidiness — they were separate values and they
+drifted. The circle grows with the viewport (`clamp(5.4rem,12.5vw,9.6rem)`)
+while `.latest`'s bottom padding was a flat clamp that stopped growing, so on a
+1440 screen the badge reached **5px into** the closing note, and further on a
+1920.
+
+The device is a **zero-height** line with a circle centred on it, so the circle
+hangs half its diameter into whatever sits above and below. Any section that
+ends against a touchline has to clear `calc(var(--touchline-circle) / 2 + …)`.
+The suite asserts 20px of clearance at five widths.
+
 ## Swapping the Instagram reels
 
 The four reels under the scoreboard are **facades**: a self-hosted cover image

@@ -30,6 +30,26 @@ def at(page, y):
     page.wait_for_timeout(350)
 
 
+def reveal_now(page):
+    """Put every revealed element in its FINAL position, instantly.
+
+    Reveals run on a per-element stagger (`--d`), so an element measured while
+    its transition is still running still carries translateY and reports the
+    wrong geometry. That has produced three separate false failures in this
+    suite — a settled 2x2 measuring as four rows, and a correctly aligned
+    eyebrow reading 1.8px out — each time sending me after a layout bug that
+    was not there.
+
+    Killing the transitions is better than guessing a longer wait: there is no
+    duration to get wrong. Only for pages that measure static layout — do NOT
+    use it where the transition itself is under test."""
+    page.add_style_tag(content="*,*::before,*::after{"
+                               "transition:none!important;animation:none!important}")
+    page.evaluate("document.querySelectorAll('[data-reveal]')"
+                  ".forEach(e => e.classList.add('is-in'))")
+    page.evaluate("document.body.offsetHeight")      # force a reflow
+
+
 def check(name, got, want):
     ok = got == want
     results.append(ok)
@@ -385,6 +405,61 @@ with sync_playwright() as p:
                pg.locator(".latest__head .eyebrow").count() == 1)
     check_true("so is the See all on Instagram link",
                pg.locator(".latest__all").count() == 1)
+
+    # The eyebrow and the See-all link have to read as one line. They did not:
+    # `.eyebrow` is itself a flex container with align-items:center, so nothing
+    # in it participates in baseline alignment and the browser synthesises the
+    # eyebrow's baseline from its box edge. Aligned on that, the link's glyphs
+    # sat 6.3px high — the same 6.3px at every width, which is what marked it
+    # as geometry rather than rounding.
+    #
+    # Compare the GLYPH boxes with a Range, not the element boxes: the link is
+    # padded for its tap target, so its element box is taller than its text and
+    # element-box tops would agree while the words visibly did not.
+    for w in (1440, 1024, 768):
+        ap = b.new_page(viewport={"width": w, "height": 900})
+        ap.goto(URL)
+        ap.wait_for_load_state("networkidle")
+        settled(ap)
+        reveal_now(ap)
+        ap.locator(".latest").scroll_into_view_if_needed()
+        d = ap.evaluate("""() => {
+            const glyphTop = el => { const r = document.createRange();
+                r.selectNodeContents(el); return r.getBoundingClientRect().top; };
+            return glyphTop(document.querySelector('.latest__all'))
+                 - glyphTop(document.querySelector('.latest__head .eyebrow'));
+        }""")
+        check_true(f"eyebrow and See-all sit on one line at {w}px ({d:+.1f}px)",
+                   abs(d) < 1.0)
+        # and the link is still a legal target after the padding was rebalanced
+        hgt = ap.evaluate("() => document.querySelector('.latest__all')"
+                          ".getBoundingClientRect().height")
+        check_true(f"  ...and it is still a 24px target ({hgt:.0f}px)", hgt >= 24)
+        ap.close()
+
+    print("\n[8a2] THE CLOSING NOTE MUST CLEAR THE DIVIDER BADGE")
+
+    # The touchline is a zero-height line with a circle centred on it, so the
+    # circle hangs half its diameter up into whatever sits above. The Latest
+    # note ended 5px INSIDE it on a 1440 screen and worse on a 1920, because
+    # the section's bottom padding was a flat clamp that stopped growing while
+    # the circle kept going. Both now come off one --touchline-circle value.
+    for w in (1920, 1440, 1024, 768, 390):
+        gp = b.new_page(viewport={"width": w, "height": 900})
+        gp.goto(URL)
+        gp.wait_for_load_state("networkidle")
+        settled(gp)
+        reveal_now(gp)
+        gp.locator(".touchline").scroll_into_view_if_needed()
+        gap = gp.evaluate("""() => {
+            const tl = document.querySelector('.touchline');
+            const line = tl.getBoundingClientRect();
+            const d = parseFloat(getComputedStyle(tl, '::after').width);
+            const note = document.querySelector('.latest__note').getBoundingClientRect();
+            return (line.top - d / 2) - note.bottom;   // circle top minus note bottom
+        }""")
+        check_true(f"note clears the badge at {w}px ({gap:+.0f}px)", gap > 20)
+        gp.close()
     ig_ctx.close()
 
     # ---------------- phone ----------------
@@ -508,9 +583,8 @@ with sync_playwright() as p:
         cp.goto(URL)
         cp.wait_for_load_state("networkidle")
         settled(cp)
-        cp.evaluate("document.querySelectorAll('[data-reveal]').forEach(e=>e.classList.add('is-in'))")
+        reveal_now(cp)
         cp.locator(".latest").scroll_into_view_if_needed()
-        cp.wait_for_timeout(400)
         m = cp.evaluate("""() => {
             const R = s => { const r = document.querySelector(s).getBoundingClientRect();
                              return [Math.round(r.left), Math.round(r.right)]; };
@@ -525,10 +599,6 @@ with sync_playwright() as p:
         # Four covers, 2x2. auto-fit gave orphan rows at several widths; this is
         # an explicit 2-column grid so the shape never changes.
         #
-        # The wait is load-bearing. Each tile reveals on a stagger (the last
-        # carries --d:.3s), and a tile mid-transition still has translateY on
-        # it, so a settled 2x2 measures as 4 rows if you look too early.
-        cp.wait_for_timeout(1800)
         tops = cp.evaluate("""() => [...new Set([...document.querySelectorAll('.reel')]
             .map(e => Math.round(e.getBoundingClientRect().top)))].length""")
         check(f"the reels are 2 rows at {w}px", tops, 2)
@@ -542,9 +612,8 @@ with sync_playwright() as p:
         cp.goto(URL)
         cp.wait_for_load_state("networkidle")
         settled(cp)
-        cp.evaluate("document.querySelectorAll('[data-reveal]').forEach(e=>e.classList.add('is-in'))")
+        reveal_now(cp)
         cp.locator(".latest").scroll_into_view_if_needed()
-        cp.wait_for_timeout(1600)
         tops = cp.evaluate("""() => [...new Set([...document.querySelectorAll('.reel')]
             .map(e => Math.round(e.getBoundingClientRect().top)))].length""")
         check(f"{w}px keeps the reels in {want_rows} rows", tops, want_rows)
