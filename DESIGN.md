@@ -72,6 +72,7 @@ seventeen magic numbers that no longer tracked the palette.
   --orange:     #EF6C00;  --orange-rgb:   239,108,  0;   /* the badge orange */
   --orange-ink: #C25400;  --orange-ink-rgb:194, 84,  0;  /* orange as TEXT on white */
   --orange-lt:  #FF9A4A;  --orange-lt-rgb:255,154, 74;   /* large text on royal only */
+  --orange-ball:#F97100;  --orange-ball-rgb:249,113,  0; /* the ball, on royal-dp */
 
   --paper:      #FFFFFF;  --paper-rgb:    255,255,255;
   --chalk:      #EDF2FB;  --chalk-rgb:    237,242,251;
@@ -96,6 +97,7 @@ seventeen magic numbers that no longer tracked the palette.
 | Primary action | `--orange` | Button grounds, numerals, jersey digits |
 | Orange as text on white | `--orange-ink` | Eyebrows, inline links |
 | Orange on royal | `--orange-lt` | Large text only |
+| Orange on royal-dp | `--orange-ball` | Footer column heads |
 
 ### Contrast — this drove a real design decision
 
@@ -108,6 +110,16 @@ Measured, not assumed:
 | `--orange` + `--ink` text | **5.51** | Passes |
 | `--orange-ink` on white | 4.60 | Passes |
 | `--orange-lt` on `--royal` | 4.26 | Large text only |
+| `--orange-ball` on `--royal-dp` | 4.61 | Passes, small text |
+
+**On `--orange-ball`.** The footer column heads are asked to be the orange of
+the ball in the badge. The ball itself samples **#F86800** and the `--orange`
+token is **#EF6C00** — on the footer's `--royal-dp` those measure **4.25** and
+**4.35**, under the 4.5 AA needs at 10.9px. `--orange-ball` is the same hue and
+saturation lifted 2% in lightness, which is the least it can move and still
+clear: **4.61**. It is within a hair of the ball either way. Do not substitute
+`--orange` here, and do not darken `--royal-dp` — there is only 2% of margin,
+and the suite asserts it.
 
 So **buttons take dark ink on orange, not white**. That is an accessibility
 requirement first, but it also reads as jersey lettering — which is where the

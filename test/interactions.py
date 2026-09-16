@@ -802,6 +802,54 @@ with sync_playwright() as p:
     }""")
     check("no interactive target under 24px", small, [])
 
+    # The footer column heads are the BALL's orange, and it is a tight fit:
+    # the ball samples #F86800 and the --orange token is #EF6C00, both of which
+    # land at 4.25-4.35:1 on the footer's #012A78 — under AA for 10.9px text.
+    # --orange-ball is the same hue and saturation lifted 2% in lightness until
+    # it cleared, at 4.61:1. That is only 2% of margin, so it is asserted: a
+    # nudge to either the token or the footer ground would drop it under.
+    fh = cw.evaluate("""() => {
+        const h = document.querySelector('.foot h3');
+        const p = c => c.match(/[\\d.]+/g).slice(0, 3).map(Number);
+        return { fg: p(getComputedStyle(h).color),
+                 bg: p(getComputedStyle(document.querySelector('.foot')).backgroundColor),
+                 px: parseFloat(getComputedStyle(h).fontSize) };
+    }""")
+
+    def _lum(c):
+        s = []
+        for v in c:
+            v /= 255
+            s.append(v / 12.92 if v <= .03928 else ((v + .055) / 1.055) ** 2.4)
+        return .2126 * s[0] + .7152 * s[1] + .0722 * s[2]
+
+    l1, l2 = _lum(fh["fg"]), _lum(fh["bg"])
+    ratio = (max(l1, l2) + .05) / (min(l1, l2) + .05)
+    check("footer heads use the ball orange", fh["fg"], [249, 113, 0])
+    check_true(f"and it still clears AA on the footer ({ratio:.2f}:1 at {fh['px']:.0f}px)",
+               ratio >= 4.5)
+
+    # The closing line is centred — checked on both pages, since the footer is
+    # copy-pasted into each rather than templated.
+    CENTRED = """() => {
+        const s = document.querySelector('.foot__sign');
+        const f = document.querySelector('.foot').getBoundingClientRect();
+        const r = document.createRange(); r.selectNodeContents(s);
+        const b = r.getBoundingClientRect();
+        return [Math.round(b.left - f.left), Math.round(f.right - b.right)];
+    }"""
+    g = cw.evaluate(CENTRED)
+    check_true(f"home: the closing line is centred (gaps {g[0]}/{g[1]})",
+               abs(g[0] - g[1]) <= 2)
+    fp = b.new_page(viewport={"width": 1440, "height": 900})
+    fp.goto(URL + "/about.html")
+    fp.wait_for_load_state("networkidle")
+    fp.wait_for_timeout(800)
+    g = fp.evaluate(CENTRED)
+    check_true(f"About: the closing line is centred (gaps {g[0]}/{g[1]})",
+               abs(g[0] - g[1]) <= 2)
+    fp.close()
+
     print("\n[12] THE WAIVER PDF")
 
     wv = cw.locator('a[href$="clinic-waiver.pdf"]')

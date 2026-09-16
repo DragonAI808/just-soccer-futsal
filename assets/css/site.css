@@ -15,6 +15,12 @@
   --orange:     #EF6C00;  --orange-rgb:   239,108,  0;   /* the badge orange */
   --orange-ink: #C25400;  --orange-ink-rgb:194, 84,  0;  /* orange as TEXT on white (4.6:1) */
   --orange-lt:  #FF9A4A;  --orange-lt-rgb:255,154, 74;   /* large text on royal only */
+  /* The ball's orange, as close as it can get on the deep-royal footer. The
+     ball itself samples #F86800 and the --orange token #EF6C00; both land at
+     4.25-4.35:1 behind the footer's #012A78, under the 4.5 AA needs for text
+     this size. Lightened along the SAME hue and saturation until it cleared,
+     which took 2% and lands within a hair of the ball anyway. */
+  --orange-ball:#F97100;  --orange-ball-rgb:249,113,  0;
 
   /* neutrals */
   --paper:      #FFFFFF;  --paper-rgb:    255,255,255;
@@ -1240,6 +1246,9 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
   font-family:var(--display); text-transform:uppercase;
   font-size:clamp(1.6rem,9.75vw,12rem);
   line-height:.9; letter-spacing:.005em;
+  /* Centred. It is sized to fill about 90% of the width, so left-aligned it
+     put all the slack on the right and read as slightly off. */
+  text-align:center;
   color:var(--paper);
   margin:0 0 clamp(2.5rem,6vh,3.75rem);
   white-space:nowrap;
@@ -1265,7 +1274,7 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
    at the same weight as everything else, which made three equal voices. */
 .foot h3{
   font-size:.68rem; font-weight:700; letter-spacing:.22em;
-  text-transform:uppercase; color:rgba(var(--chalk-rgb),.62);
+  text-transform:uppercase; color:var(--orange-ball);
   margin-bottom:1.1rem;
 }
 /* WCAG 2.2 target size wants 24px minimum; these links were 17px tall boxes
