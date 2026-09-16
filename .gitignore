@@ -11,3 +11,7 @@
 /.claude/
 node_modules/
 _chrome/
+
+# Superseded hero cuts kept locally for comparison. 23MB of them, and git
+# never forgets a binary - once committed they are in the history forever.
+/assets/video/Old/
