@@ -246,7 +246,7 @@ Three things that are load-bearing and not obvious:
 
 ## Swapping the Instagram reels
 
-The three reels under the scoreboard are **facades**: a self-hosted cover image
+The four reels under the scoreboard are **facades**: a self-hosted cover image
 plus a play badge. Instagram is contacted only when a visitor clicks one. To
 change a reel you need its id (the code in its URL) and a cover image.
 
@@ -281,11 +281,31 @@ Two things that are easy to get wrong:
   bottom few rows — near-zero means bars.
 
 **Adding or removing one is a CSS change too.** `.latest__row` is an explicit
-`repeat(3, ...)`, not `auto-fit`: with three covers auto-fit produced a 2 + 1 at
-tablet widths, one reel orphaned on its own row. Change the `3` to match the
-number of tiles, and check `--strip` on `.latest` still fits them — it went from
-44rem to 60rem when the third was added. The suite asserts they all sit on one
-row down to 768px and stack cleanly below.
+`repeat(2, ...)`, not `auto-fit` — four tiles in a 2x2. auto-fit orphaned a tile
+on its own row at several widths, and the shape changed as the window moved.
+Change the column count to match the number of tiles, and check `--strip` on
+`.latest` still fits them: it has been 44rem for two, 60rem for three across,
+and is 40rem for the 2x2. The suite asserts two rows of two from 1920px down to
+320px.
+
+**The 2x2 holds on phones too.** Stacking four 9:16 covers in one column made
+the section 2800px tall on a 390px screen — more than three screenfuls of reels
+between the visitor and the scoreboard. Two up keeps it near 1060px, with
+covers around 169px wide, which is roughly what Instagram's own profile grid
+gives you.
+
+**Clicking a tile used to jump the page on a phone.** `.is-live` hides the
+facade and Instagram's blockquote is nearly empty until `embed.js` processes it,
+so the tile collapsed from 678px to 55px and sprang back to 710px a second and a
+half later. Stacked on a phone, everything below moved 592px up and then down:
+measured **CLS 0.1217**, and it happens while the thumb is still on the screen.
+Desktop never showed it because the sibling tiles hold the row's height.
+
+`site.js` now writes the tile's measured height to `min-height` before adding
+`.is-live`. **min-height, not height** — the embed is usually taller than the
+cover it replaced and must stay free to grow; it just can no longer be shorter.
+CLS drops to 0.0758. The `onerror` path clears it along with `.is-live`, or a
+restored facade would sit in a box holding space for an embed that never came.
 
 **Keep them current.** These posts are dated by nature — the Futsal Fridays reel
 literally says *"tomorrow"* in its Instagram caption, which is why the caption

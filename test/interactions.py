@@ -333,7 +333,7 @@ with sync_playwright() as p:
 
     check("no Meta request on page load", meta_hosts(), [])
     check("no cookies set on page load", len(ig_ctx.cookies()), 0)
-    REELS = 3
+    REELS = 4
     check("every reel renders as a facade",
           ig.locator(".reel .reel__btn").count(), REELS)
     check("no live embed before a click", ig.locator(".reel.is-live").count(), 0)
@@ -352,6 +352,39 @@ with sync_playwright() as p:
     check_true("an embed iframe was built", ig.locator(".reel.is-live iframe").count() >= 1)
     check("the others are still facades",
           ig.locator(".reel:not(.is-live)").count(), REELS - 1)
+
+    # THE JUMP. .is-live hides the facade and Instagram's blockquote is nearly
+    # empty until embed.js processes it, so the tile used to collapse from
+    # 678px to 55px and spring back a second and a half later. On a phone the
+    # tiles are stacked, so everything below moved 592px up and then down —
+    # measured CLS 0.1217, right as the thumb is still on the screen. Desktop
+    # never showed it, because the sibling tiles hold the row's height.
+    live = ig.locator(".reel.is-live").first
+    reserved = live.evaluate("e => parseFloat(e.style.minHeight) || 0")
+    check_true(f"the tile reserves its height on click ({reserved:.0f}px)",
+               reserved > 200)
+    # min-height, not height: the embed is usually TALLER than the cover it
+    # replaced and must still be free to grow.
+    check("it is min-height so the embed can still grow",
+          live.evaluate("e => e.style.height || '(unset)'"), "(unset)")
+    check_true("and the tile never shrank below what it reserved",
+               live.evaluate("e => e.getBoundingClientRect().height") >= reserved - 1)
+
+    print("\n[8a] THE REEL STRIP HEAD")
+
+    t = pg.locator(".latest__title")
+    check("the strip has a section title", t.count(), 1)
+    check("it reads 'Instagram reels'", t.inner_text().strip().lower(), "instagram reels")
+    # Small on purpose — the eyebrow above already announces the section, and
+    # this must not compete with the real h2s further down the page.
+    tsize = t.evaluate("e => parseFloat(getComputedStyle(e).fontSize)")
+    h2size = pg.locator(".game .h2").evaluate("e => parseFloat(getComputedStyle(e).fontSize)")
+    check_true(f"and it is smaller than a section heading ({tsize:.0f}px vs {h2size:.0f}px)",
+               tsize < h2size * 0.7)
+    check_true("the eyebrow is still there",
+               pg.locator(".latest__head .eyebrow").count() == 1)
+    check_true("so is the See all on Instagram link",
+               pg.locator(".latest__all").count() == 1)
     ig_ctx.close()
 
     # ---------------- phone ----------------
@@ -489,21 +522,22 @@ with sync_playwright() as p:
               abs(left - right) <= 2, True)
         check(f"head, covers and note share one edge at {w}px",
               [m["head"], m["note"]], [m["row"], m["row"]])
-        # With three covers, auto-fit used to give 2 + 1 at tablet widths — one
-        # reel orphaned on its own row. Three across or one down, never a
-        # remainder. Compare the tops: same row means same top.
+        # Four covers, 2x2. auto-fit gave orphan rows at several widths; this is
+        # an explicit 2-column grid so the shape never changes.
         #
-        # The wait is load-bearing. Each tile reveals on a stagger (the third
-        # carries --d:.2s), and a tile mid-transition still has translateY on
-        # it, so its top differs and three-on-one-row reads as three rows.
-        cp.wait_for_timeout(1400)
+        # The wait is load-bearing. Each tile reveals on a stagger (the last
+        # carries --d:.3s), and a tile mid-transition still has translateY on
+        # it, so a settled 2x2 measures as 4 rows if you look too early.
+        cp.wait_for_timeout(1800)
         tops = cp.evaluate("""() => [...new Set([...document.querySelectorAll('.reel')]
             .map(e => Math.round(e.getBoundingClientRect().top)))].length""")
-        check(f"all three covers sit on one row at {w}px", tops, 1)
+        check(f"the reels are 2 rows at {w}px", tops, 2)
         cp.close()
 
-    # ...and at tablet widths it must stack cleanly rather than orphan one.
-    for w, want_rows in ((768, 1), (720, 3), (390, 3)):
+    # The 2x2 holds all the way down. Stacking four 9:16 covers in one column
+    # made the section 2800px tall on a phone - three screenfuls of reels
+    # between the visitor and the scoreboard.
+    for w, want_rows in ((768, 2), (520, 2), (390, 2), (320, 2)):
         cp = b.new_page(viewport={"width": w, "height": 900})
         cp.goto(URL)
         cp.wait_for_load_state("networkidle")
@@ -513,7 +547,11 @@ with sync_playwright() as p:
         cp.wait_for_timeout(1600)
         tops = cp.evaluate("""() => [...new Set([...document.querySelectorAll('.reel')]
             .map(e => Math.round(e.getBoundingClientRect().top)))].length""")
-        check(f"{w}px lays the reels out {want_rows} row(s), no orphan", tops, want_rows)
+        check(f"{w}px keeps the reels in {want_rows} rows", tops, want_rows)
+        cols = cp.evaluate("""() => { const r=[...document.querySelectorAll('.reel')]
+            .map(e => Math.round(e.getBoundingClientRect().top));
+            return r.filter(t => t === r[0]).length; }""")
+        check(f"  ...two per row at {w}px", cols, 2)
         cp.close()
 
     print("\n[9b] THE MENU PANEL MUST BE OPAQUE, SCROLLED OR NOT")

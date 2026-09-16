@@ -389,8 +389,13 @@
     };
     s.onerror = function () {
       // Instagram unreachable or blocked by a content blocker. Put the cover
-      // back rather than leaving an empty hole where the reel should be.
-      $$('.reel.is-live').forEach(function (c) { c.classList.remove('is-live'); });
+      // back rather than leaving an empty hole where the reel should be — and
+      // drop the reserved height with it, or the restored facade sits in a box
+      // still holding space for an embed that never arrived.
+      $$('.reel.is-live').forEach(function (c) {
+        c.classList.remove('is-live');
+        c.style.minHeight = '';
+      });
       igRequested = false;
     };
     document.body.appendChild(s);
@@ -403,6 +408,22 @@
       if (card.classList.contains('is-live')) return;
       var id = card.dataset.reel;
       if (!id) return;
+
+      // Hold the tile's height across the swap.
+      //
+      // .is-live sets display:none on the facade, and Instagram's blockquote
+      // is nearly empty until embed.js processes it — so the tile collapsed
+      // from 678px to 55px instantly and sprang back to 710px a second and a
+      // half later. On a phone the tiles are stacked, so everything below
+      // jumped 592px up and then back down: measured CLS 0.1217, over the 0.1
+      // threshold, and it happens right as the thumb is still on the screen.
+      //
+      // Desktop never showed it because the tiles sit in a row and the
+      // siblings hold the row's height while one of them collapses.
+      //
+      // min-height, not height: the embed is free to be TALLER than the cover
+      // it replaced, which it usually is. It just can no longer be shorter.
+      card.style.minHeight = card.getBoundingClientRect().height + 'px';
 
       var bq = document.createElement('blockquote');
       bq.className = 'instagram-media';

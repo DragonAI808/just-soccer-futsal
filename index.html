@@ -68,7 +68,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="assets/css/site.css?v=38">
+<link rel="stylesheet" href="assets/css/site.css?v=40">
 
 <!-- The hero POSTER is the LCP element now, not the photograph: it is what paints
      while the clip is still arriving, and on a phone or under reduced motion it
@@ -226,8 +226,11 @@
      ========================================================== -->
 <section class="latest" id="latest">
   <div class="latest__head">
-    <p class="eyebrow" data-reveal>Latest from the court</p>
-    <a class="latest__all" href="https://www.instagram.com/justsoccerfutsal" data-reveal target="_blank" rel="noopener">
+    <div>
+      <p class="eyebrow" data-reveal>Latest from the court</p>
+      <h2 class="latest__title" data-reveal style="--d:.06s">Instagram reels</h2>
+    </div>
+    <a class="latest__all" href="https://www.instagram.com/justsoccerfutsal" data-reveal style="--d:.12s" target="_blank" rel="noopener">
       See all on Instagram &rarr;<span class="vh"> (opens in a new tab)</span></a>
   </div>
 
@@ -275,6 +278,21 @@
         </span>
       </button>
       <p class="reel__cap">Futsal fun starts here &mdash; Tuesdays 5&ndash;7pm, Fridays 4&ndash;6:45pm, all ages</p>
+    </article>
+
+    <article class="reel" data-reel="DaEcNhtsI18" data-reveal style="--d:.3s">
+      <button class="reel__btn" type="button"
+              aria-label="Play the Futsal Cup championship reel from Instagram. Opens Instagram's player.">
+        <picture>
+          <source type="image/webp" srcset="assets/img/reel-cup.webp">
+          <img src="assets/img/reel-cup.jpg" width="640" height="1136" loading="lazy" decoding="async"
+               alt="Players competing on the court during a Futsal Cup championship game.">
+        </picture>
+        <span class="reel__play" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>
+        </span>
+      </button>
+      <p class="reel__cap">The Futsal Cup &mdash; championship games on the court</p>
     </article>
   </div>
 
@@ -558,6 +576,6 @@
   </div>
 </footer>
 
-<script src="assets/js/site.js?v=38"></script>
+<script src="assets/js/site.js?v=40"></script>
 </body>
 </html>

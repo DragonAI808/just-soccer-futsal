@@ -729,10 +729,11 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
   /* One width for the whole strip, so the head and the covers cannot drift
      apart. The reels are 9:16 - at full page width they sit marooned on the
      left with the section heading running out past them.
-     Sized for THREE covers now. At the old 44rem a third one could not fit
-     beside the other two - auto-fit would have dropped it to a second row on
-     its own, which reads as a mistake rather than a layout. */
-  --strip:60rem;
+     Sized for a 2x2 of four. At the 60rem the three-up used, a 2x2 would give
+     464px covers - 825px tall each, 1650px of section before the captions.
+     40rem puts them at ~300px wide, which is the same size they were when
+     there were three across. */
+  --strip:40rem;
 }
 .latest__head{
   max-width:var(--strip); margin-inline:auto;
@@ -740,6 +741,16 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
   gap:.6rem 1.5rem;
 }
 .latest__head .eyebrow{ margin-bottom:0; }
+/* Deliberately small. The section already announces itself with the eyebrow
+   above it; this only needs to say which platform the tiles come from, so it
+   sits nearer .h3 than .h2 and does not compete with the real section
+   headings further down the page. */
+.latest__title{
+  font-family:var(--display); font-weight:400;
+  font-size:clamp(1.25rem,1.05rem + .7vw,1.6rem);
+  line-height:1.05; letter-spacing:.01em; text-transform:uppercase;
+  margin-top:.45rem;
+}
 .latest__all{
   display:inline-block; padding:.3rem 0;   /* 21px tall was under the 24px target minimum */
   font-size:.74rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
@@ -749,20 +760,27 @@ body:not(.is-loaded){ overflow:hidden; height:100vh; }
 }
 .latest__all:hover, .latest__all:focus-visible{ border-color:var(--orange); }
 
-/* Explicit 3, not auto-fit. With three covers auto-fit produced a 2 + 1 at
-   tablet widths — one reel orphaned on its own row, which reads as a mistake
-   rather than a layout. Three or one, nothing in between.
-   IF THE NUMBER OF REELS CHANGES, change the 3 here to match. */
+/* Explicit 2x2, not auto-fit. Four 9:16 covers in one row would each be about
+   215px wide on a laptop and the strip would run the full page; auto-fit at
+   these sizes also produced orphan rows (3 + 1, then 2 + 2 only by luck).
+   Two by two holds the same shape from a large monitor down to a small tablet,
+   and only collapses to one column when a cover would stop reading.
+   IF THE NUMBER OF REELS CHANGES, revisit this and --strip together. */
 .latest__row{
   margin-top:clamp(1.5rem,3vh,2.2rem);
-  display:grid; gap:clamp(1rem,2.5vw,2rem);
-  grid-template-columns:repeat(3,minmax(0,1fr));
+  display:grid; gap:clamp(1rem,2.2vw,1.6rem);
+  grid-template-columns:repeat(2,minmax(0,1fr));
   max-width:var(--strip); margin-inline:auto;
 }
-@media (max-width:720px){
-  /* below this, three covers are under ~200px wide and stop reading. The cap
-     keeps a single stacked cover from going full-bleed on a small tablet. */
-  .latest__row{ grid-template-columns:1fr; max-width:22rem; }
+/* The 2x2 holds all the way down to the smallest phone. Stacking four 9:16
+   covers in one column made the section 2800px tall on a 390px screen - more
+   than three screenfuls of nothing but reels, to reach a scoreboard and a
+   phone number. Two up keeps it near 700px. The covers land around 167px wide
+   there, which is about what Instagram's own profile grid gives you. */
+@media (max-width:560px){
+  .latest__row{ gap:.7rem; }
+  /* the captions are what break first at this width, not the images */
+  .reel__cap{ font-size:.76rem; line-height:1.35; }
 }
 .reel{ display:flex; flex-direction:column; gap:.85rem; }
 
